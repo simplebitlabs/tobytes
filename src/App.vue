@@ -17,7 +17,15 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300)
   }
 }
 
-function hexToBytes(hex: string): number[] {
+function hexToBytes(hex: string): number[] | undefined {
+  const prefix = '\\x'
+  if (hex.startsWith(prefix)) {
+    hex = hex.slice(prefix.length)
+  }
+  if (!/^[a-fA-F\d]+$/.test(hex)) {
+    console.log('not a hex string')
+    return undefined
+  }
   return hex
     .replace(/\s+/g, '') // Remove whitespace
     .match(/.{2}/g) // Split into pairs
@@ -34,11 +42,11 @@ const input = ref(
 
 const output = computed(() => {
   let val = input.value
-  const prefix = '\\x'
-  if (val.startsWith(prefix)) {
-    val = val.slice(prefix.length)
+  const asBytes = hexToBytes(val)
+  console.log(asBytes)
+  if (asBytes) {
+    val = bytesToUTF8(asBytes)
   }
-  val = bytesToUTF8(hexToBytes(val))
   return val
 })
 
