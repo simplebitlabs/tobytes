@@ -1,39 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300): (...args: Parameters<T>) => void {
-  let timeoutId: number | undefined
-
-  return function (...args: Parameters<T>) {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    timeoutId = setTimeout(() => {
-      fn(...args)
-      timeoutId = undefined
-    }, delay)
-  }
-}
-
-function hexToBytes(hex: string): number[] | undefined {
-  const prefix = '\\x'
-  if (hex.startsWith(prefix)) {
-    hex = hex.slice(prefix.length)
-  }
-  if (!/^[a-fA-F\d]+$/.test(hex)) {
-    return undefined
-  }
-  return hex
-    .replace(/\s+/g, '') // Remove whitespace
-    .match(/.{2}/g) // Split into pairs
-    ?.map((byte) => parseInt(byte, 16))
-}
-
-function bytesToUTF8(bytes: number[] | Uint8Array): string {
-  return new TextDecoder().decode(new Uint8Array(bytes))
-}
+import { debounce, hexToBytes, bytesToUTF8 } from './b2x'
 
 const input = ref(
   '\\x0a0c08b498f6bb0610eca0f6bb062a0b120234302a0530343331302a0b120234302a0530393434302a0b120234302a0530353038352a0b120234302a0530333634302a0b1202343' +
@@ -87,6 +54,9 @@ const update = debounce((e: Event) => {
           <option selected>Hexadecimal</option>
           <option>JWT</option>
           <option>URL Encoded</option>
+          <option>UTF-8 Text</option>
+          <option>ISO-8859-1 Text</option>
+          <option>Windows-1252 (CP-1252) Text</option>
         </select>
       </div>
     </div>
