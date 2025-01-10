@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { debounce, hexToBytes, bytesToUTF8 } from './b2x'
+import { hexToBytes, bytesToUTF8, InputType, autodetectType } from './b2x'
 
 const input = ref(
   '\\x0a0c08b498f6bb0610eca0f6bb062a0b120234302a0530343331302a0b120234302a0530393434302a0b120234302a0530353038352a0b120234302a0530333634302a0b1202343' +
@@ -19,48 +19,93 @@ const input = ref(
     '2b2041d0a0534323531341201301a1132303235303130372031353a31313a3334',
 )
 
+const inputTypeManual = ref(InputType[InputType.Unknown])
+
+const inputType = computed(() => {
+  if (inputTypeManual.value != InputType[InputType.Unknown]) {
+    return inputTypeManual.value
+  }
+  return InputType[autodetectType(input.value)]
+})
+
+const hasBom = computed(() => {
+  const val = input.value
+  return val.startsWith('\ufeff')
+})
+
+const nonBMP = computed(() => {
+  return input.value.length != [...input.value].length
+})
+
 const output = computed(() => {
   let val = input.value
-  const asBytes = hexToBytes(val)
-  console.log(asBytes)
-  if (asBytes) {
-    val = bytesToUTF8(asBytes)
+  if (inputType.value == InputType[InputType.Hexadecimal]) {
+    const asBytes = hexToBytes(val)
+    console.log(asBytes)
+    if (asBytes) {
+      val = bytesToUTF8(asBytes)
+    }
+  } else if (inputType.value == InputType[InputType.Base64]) {
+    if (typeof window !== 'undefined') {
+      console.log('attempting base64 decode: ' + input.value)
+      val = window.atob(input.value)
+      console.log(val)
+    } else {
+      const asBytes = Buffer.from(input.value, 'base64')
+      console.log(asBytes)
+      if (asBytes) {
+        val = bytesToUTF8(asBytes)
+      }
+    }
   }
   return val
 })
 
-const update = debounce((e: Event) => {
-  if (e.target) {
-    const targetValue = (e.target as HTMLTextAreaElement).value
-    input.value = targetValue
-  }
-}, 100)
+const outputLength = computed(() => {
+  // TODO: characters vs codepoints vs bytes
+  return output.value.length
+})
 </script>
 
 <template>
   <header></header>
 
   <main>
-    <div class="editor">
-      <textarea class="input" :value="input" @input="update"></textarea>
+    <div class="left">
+      <textarea class="input" v-model="input"></textarea>
+      <h3>Input Metadata</h3>
       <div>
-        Auto-detected: Hexadecimal<br />
+        Auto-detected: {{ inputType }}<br />
         Choose a different type:
-        <select>
+        <select v-model="inputTypeManual">
+          <option value="Unknown"></option>
           <option>Base 36</option>
-          <option>Base 64</option>
-          <option>Base 64 URL</option>
+          <option value="Base64">Base 64</option>
+          <option value="Base64URL">Base 64 URL</option>
           <option>C Escaped</option>
-          <option selected>Hexadecimal</option>
+          <option value="Hexadecimal">Hexadecimal (Base 16)</option>
           <option>JWT</option>
           <option>URL Encoded</option>
-          <option>UTF-8 Text</option>
+          <option value="ASCII">ASCII Text</option>
+          <option value="UTF8">UTF-8 Text</option>
           <option>ISO-8859-1 Text</option>
           <option>Windows-1252 (CP-1252) Text</option>
         </select>
       </div>
+      <div>
+        Contains <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>:
+        {{ hasBom ? '✅' : '❌' }}
+      </div>
+      <div>
+        Uses characters outside the
+        <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane">BMP</a>:
+        {{ nonBMP ? '✅' : '❌' }}
+      </div>
     </div>
-    <div class="output" v-html="output"></div>
+    <div class="right">
+      <div class="output" v-html="output"></div>
+      <div class="output-meta">{{ outputLength }} characters</div>
+    </div>
   </main>
 
   <footer></footer>
