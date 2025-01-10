@@ -31,6 +31,7 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('bGlnaHQgdw==')).toBe(InputType.Base64)
   // line wraps shouldn't matter
   expect(autodetectInputType('bGlna\nHQgdw==')).toBe(InputType.Base64)
+  expect(autodetectInputType('bGlna\nHQgdw==\n')).toBe(InputType.Base64)
   expect(autodetectInputType('fn5+fn5+')).toBe(InputType.Base64) // ~~~~~~
   expect(autodetectInputType('fn5-fn5-')).toBe(InputType.Base64URL) // ~~~~~~
   expect(autodetectInputType('abc123.')).toBe(InputType.ASCII)

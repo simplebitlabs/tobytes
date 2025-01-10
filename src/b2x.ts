@@ -70,7 +70,7 @@ function autodetectInputType(input: string): InputType {
     // Hexadecimal input without '0x' or '\x' prefix
     return InputType.Hexadecimal
   }
-  if (/^[A-Za-z0-9+/ \r\n\t]+=?=?$/.test(input)) {
+  if (/^[A-Za-z0-9+/ \r\n\t]+=?=?[ \r\n\t]*$/.test(input)) {
     // TODO: detect and report missing or invalid padding based on length
     try {
       base64ToBytes(input)
