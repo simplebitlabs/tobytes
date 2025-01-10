@@ -1,7 +1,8 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
 
-/// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { defineConfig, type UserConfig } from 'vite'
+import type { InlineConfig } from 'vitest/node'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
@@ -20,4 +21,4 @@ export default defineConfig({
     // (requires installing happy-dom as a peer dependency)
     environment: 'happy-dom',
   },
-})
+} as UserConfig & { test: InlineConfig })
