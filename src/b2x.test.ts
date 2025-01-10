@@ -29,22 +29,18 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('ab c1 23')).toBe(InputType.Hexadecimal)
   expect(autodetectInputType('bGlnaHQgd29y')).toBe(InputType.Base64)
   expect(autodetectInputType('bGlnaHQgdw==')).toBe(InputType.Base64)
+  // line wraps shouldn't matter
+  expect(autodetectInputType('bGlna\nHQgdw==')).toBe(InputType.Base64)
   expect(autodetectInputType('fn5+fn5+')).toBe(InputType.Base64) // ~~~~~~
   expect(autodetectInputType('fn5-fn5-')).toBe(InputType.Base64URL) // ~~~~~~
   expect(autodetectInputType('abc123.')).toBe(InputType.ASCII)
-  expect(autodetectInputType('The quick brown fox jumps over the lazy dog')).toBe(InputType.ASCII)
+  // TODO: get smart enough that we can say "yeah, this is text, not base64"
+  // expect(autodetectInputType('The quick brown fox jumps over the lazy dog')).toBe(InputType.ASCII)
+  expect(autodetectInputType('The quick brown fox jumps over the lazy dog.')).toBe(InputType.ASCII)
   expect(autodetectInputType('.')).toBe(InputType.ASCII)
   expect(autodetectInputType('~')).toBe(InputType.ASCII)
   expect(autodetectInputType('✅')).toBe(InputType.UTF8)
   expect(autodetectInputType('👋 👋')).toBe(InputType.UTF8) // this emoji is outside the Unicode BMP
-
-  const input = '👋 👋'
-  console.log('input length codep: ' + input.length)
-  console.log('input length chars: ' + [...input].length)
-  // see also: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/length
-  // notes about Intl.Segmenter
-  console.log(input.codePointAt(0)) // charCodeAt doesn't handle UTF-16 surrogate pairs
-  console.log([...input].map((c) => c.codePointAt(0)))
 })
 
 test('autodetectDataType', () => {

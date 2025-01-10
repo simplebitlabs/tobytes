@@ -63,6 +63,11 @@ const dataType = computed(() => {
   return DataType[autodetectDataType(data.value)]
 })
 
+const displayASCII = ref(false)
+const displayControlCharacters = ref(false)
+const displayCodePoints = ref(false)
+const clipboardCopyType = ref('lowerhex')
+
 const output = computed(() => {
   return bytesToUTF8(data.value)
 })
@@ -120,21 +125,36 @@ const outputBytes = computed(() => {
       <div class="meta">{{ inputBytes }} bytes encoded as UTF-8</div>
     </div>
     <div class="middle">
-      <h2>Hex Representation</h2>
-      <div class="output"><HexOutput :items="data" :printASCII="false" /></div>
+      <h2>Raw Bytes</h2>
+      <div class="output">
+        <HexOutput
+          :items="data"
+          :printASCII="displayASCII"
+          :printControlCharacters="displayControlCharacters"
+          :printCodePoints="displayCodePoints"
+        />
+      </div>
+      <h3>Display Options</h3>
+      <input type="checkbox" id="hex-ascii" name="hex-ascii" v-model="displayASCII" />
+      <label for="hex-ascii"> Display ASCII printable characters</label><br />
+      <input type="checkbox" id="hex-cc" name="hex-cc" v-model="displayControlCharacters" />
+      <label for="hex-cc">
+        Use Unicode <a href="https://en.wikipedia.org/wiki/Control_Pictures">Control Character Pictures</a></label
+      ><br />
+      <input type="checkbox" id="hex-cp" name="hex-cp" v-model="displayCodePoints" />
+      <label for="hex-cp"> Use Unicode Code Points, Not Bytes</label><br />
       <h3>Copy to Clipboard</h3>
-      <button>As Hex (aabbcc)</button><br />
-      <button>As Hex (aa bb cc)</button><br />
-      <button>As Hex (\xAABBCC)</button><br />
-      <button>As Base 64</button><br />
-      <button>As Base 64 URL</button>
-    </div>
-    <div class="middle2">
-      <h2>ASCII-ish Representation</h2>
-      <div class="output"><HexOutput :items="data" :printASCII="true" /></div>
+      <button>Copy</button> Format:
+      <select v-model="clipboardCopyType">
+        <option value="lowerhex">Hex (aabb11cc)</option>
+        <option value="upperhex">Hex (AABB11CC)</option>
+        <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
+        <option value="upperhexspace">Hex (AA BB 11 CC)</option>
+        <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
+      </select>
     </div>
     <div class="right">
-      <h2>Text Representation</h2>
+      <h2>Output Text</h2>
       <div class="output"><div class="text-output" v-html="output"></div></div>
       <h3>Output Metadata</h3>
       <div class="meta">Detected Data Type: {{ dataType }}</div>
@@ -142,7 +162,7 @@ const outputBytes = computed(() => {
       <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
       <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>
       <div class="meta">
-        Contains <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>:
+        Starts with the <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>:
         {{ hasBom ? '✅' : '❌' }}
       </div>
       <div class="meta">
