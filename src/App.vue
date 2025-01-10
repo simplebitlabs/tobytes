@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { hexToBytes, bytesToUTF8, InputType, autodetectType } from './b2x'
+import { hexToBytes, bytesToUTF8, InputType, autodetectInputType, DataType, autodetectDataType } from './b2x'
+
+function arrayToHex(arr: Uint8Array | number[]): string {
+  return [...arr].map((num) => num.toString(16).padStart(2, '0')).join(' ')
+}
 
 const input = ref(
   '\\x0a0c08b498f6bb0610eca0f6bb062a0b120234302a0530343331302a0b120234302a0530393434302a0b120234302a0530353038352a0b120234302a0530333634302a0b1202343' +
@@ -25,45 +29,63 @@ const inputType = computed(() => {
   if (inputTypeManual.value != InputType[InputType.Unknown]) {
     return inputTypeManual.value
   }
-  return InputType[autodetectType(input.value)]
+  return InputType[autodetectInputType(input.value)]
 })
 
-const hasBom = computed(() => {
+const inputCharacters = computed(() => {
+  return [...input.value].length
+})
+
+const inputBytes = computed(() => {
+  return new TextEncoder().encode(input.value).length
+})
+
+const data = computed(() => {
   const val = input.value
-  return val.startsWith('\ufeff')
+  if (inputType.value == InputType[InputType.Hexadecimal]) {
+    return hexToBytes(val) || []
+  } else if (inputType.value == InputType[InputType.Base64]) {
+    if (typeof window !== 'undefined') {
+      const binary = window.atob(input.value)
+      const array = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i)
+      }
+      return array
+    } else {
+      return Buffer.from(input.value, 'base64')
+    }
+  }
+  return new TextEncoder().encode(val)
 })
 
-const nonBMP = computed(() => {
-  return input.value.length != [...input.value].length
+const dataType = computed(() => {
+  return DataType[autodetectDataType(data.value)]
 })
 
 const output = computed(() => {
-  let val = input.value
-  if (inputType.value == InputType[InputType.Hexadecimal]) {
-    const asBytes = hexToBytes(val)
-    console.log(asBytes)
-    if (asBytes) {
-      val = bytesToUTF8(asBytes)
-    }
-  } else if (inputType.value == InputType[InputType.Base64]) {
-    if (typeof window !== 'undefined') {
-      console.log('attempting base64 decode: ' + input.value)
-      val = window.atob(input.value)
-      console.log(val)
-    } else {
-      const asBytes = Buffer.from(input.value, 'base64')
-      console.log(asBytes)
-      if (asBytes) {
-        val = bytesToUTF8(asBytes)
-      }
-    }
-  }
-  return val
+  return bytesToUTF8(data.value)
 })
 
-const outputLength = computed(() => {
-  // TODO: characters vs codepoints vs bytes
+const hasBom = computed(() => {
+  console.log(data.value)
+  return data.value.length >= 3 && data.value[0] == 0xef && data.value[1] == 0xbb && data.value[2] == 0xbf
+})
+
+const outputCharacters = computed(() => {
+  return [...output.value].length
+})
+
+const outputCodePoints = computed(() => {
   return output.value.length
+})
+
+const nonBMP = computed(() => {
+  return outputCharacters.value != outputCodePoints.value
+})
+
+const outputBytes = computed(() => {
+  return data.value.length
 })
 </script>
 
@@ -72,13 +94,14 @@ const outputLength = computed(() => {
 
   <main>
     <div class="left">
+      <h2>Input</h2>
       <textarea class="input" v-model="input"></textarea>
       <h3>Input Metadata</h3>
-      <div>
-        Auto-detected: {{ inputType }}<br />
+      <div class="meta">Detected Data Type: {{ inputType }}</div>
+      <div class="meta">
         Choose a different type:
         <select v-model="inputTypeManual">
-          <option value="Unknown"></option>
+          <option value="Unknown">Autodetect</option>
           <option>Base 36</option>
           <option value="Base64">Base 64</option>
           <option value="Base64URL">Base 64 URL</option>
@@ -92,19 +115,30 @@ const outputLength = computed(() => {
           <option>Windows-1252 (CP-1252) Text</option>
         </select>
       </div>
-      <div>
+      <div class="meta">{{ inputCharacters }} characters</div>
+      <div class="meta">{{ inputBytes }} bytes encoded as UTF-8</div>
+    </div>
+    <div class="middle">
+      <h2>Hex Representation</h2>
+      <div class="output">{{ arrayToHex(data) }}</div>
+    </div>
+    <div class="right">
+      <h2>Text Representation</h2>
+      <div class="output" v-html="output"></div>
+      <h3>Output Metadata</h3>
+      <div class="meta">Detected Data Type: {{ dataType }}</div>
+      <div class="meta">{{ outputCharacters }} characters</div>
+      <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
+      <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>
+      <div class="meta">
         Contains <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>:
         {{ hasBom ? '✅' : '❌' }}
       </div>
-      <div>
+      <div class="meta">
         Uses characters outside the
         <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane">BMP</a>:
         {{ nonBMP ? '✅' : '❌' }}
       </div>
-    </div>
-    <div class="right">
-      <div class="output" v-html="output"></div>
-      <div class="output-meta">{{ outputLength }} characters</div>
     </div>
   </main>
 

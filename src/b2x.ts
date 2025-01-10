@@ -15,11 +15,10 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300)
 }
 
 function hexToBytes(hex: string): number[] | undefined {
-  const prefix = '\\x'
-  if (hex.startsWith(prefix)) {
-    hex = hex.slice(prefix.length)
+  if (hex.startsWith('\\x') || hex.startsWith('0x')) {
+    hex = hex.slice(2)
   }
-  if (!/^[a-fA-F\d]+$/.test(hex)) {
+  if (!/^[a-fA-F0-9 \r\n\t]+$/.test(hex)) {
     return undefined
   }
   return hex
@@ -40,15 +39,13 @@ enum InputType {
   Base64,
   Base64URL,
   ASCII,
-  //ISO88591,
   UTF8,
-  //Windows1252,
 }
 
-function autodetectType(input: string): InputType {
+function autodetectInputType(input: string): InputType {
   if (input.startsWith('0x') || input.startsWith('\\x')) {
     return InputType.Hexadecimal
-  } else if (/^[a-fA-F0-9]+$/.test(input)) {
+  } else if (/^[a-fA-F0-9 \r\n\t]+$/.test(input)) {
     // Hexadecimal input without '0x' prefix
     return InputType.Hexadecimal
   } else if (/^[A-Za-z0-9+/]+=?=?$/.test(input)) {
@@ -63,4 +60,30 @@ function autodetectType(input: string): InputType {
   return InputType.UTF8
 }
 
-export { debounce, hexToBytes, bytesToUTF8, InputType, autodetectType }
+enum DataType {
+  Unknown = 0,
+  Binary,
+  ASCII,
+  //ISO88591,
+  //ISO885915,
+  UTF8,
+  //Windows1252,
+}
+
+function autodetectDataType(bytes: number[] | Uint8Array): DataType {
+  // printable characters + horizontal tab, LF, CR
+  const ascii = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
+  // From https://en.wikipedia.org/wiki/UTF-8#Byte_map
+  const isUTF8Continuation = (b: number) => b >= 0x80 && b <= 0xbf
+  const notInUTF8 = (b: number) => b == 0xc0 || b == 0xc1 || (b >= 0xf5 && b <= 0xff)
+  if (bytes.every(ascii)) {
+    return DataType.ASCII
+  } else if (bytes.some(isUTF8Continuation) && !bytes.some(notInUTF8)) {
+    return DataType.UTF8
+  } else if (bytes.some((b) => (b >= 0x00 && b <= 0x1f) || b == 0x7f)) {
+    return DataType.Binary
+  }
+  return DataType.Unknown
+}
+
+export { debounce, hexToBytes, bytesToUTF8, InputType, autodetectInputType, DataType, autodetectDataType }
