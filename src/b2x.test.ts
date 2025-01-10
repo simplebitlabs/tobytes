@@ -10,9 +10,15 @@ test('hexToBytes', () => {
   expect(hexToBytes('not hex')).toBeUndefined()
 })
 
+test('bytesToUTF8', () => {
+  const input = [0xf0, 0x9f, 0x91, 0x8b] // UTF-8 encoded 👋
+  const expectedOutput = '👋'
+  expect(bytesToUTF8(input)).toBe(expectedOutput)
+})
+
 test('bytesToUTF8 with BOM', () => {
   const input = [0xef, 0xbb, 0xbf, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a] // BOM followed by "hello\n"
-  const expectedOutput = 'hello\n'
+  const expectedOutput = '\ufeffhello\n'
   expect(bytesToUTF8(input)).toBe(expectedOutput)
 })
 

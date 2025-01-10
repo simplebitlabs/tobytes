@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { hexToBytes, bytesToUTF8, InputType, autodetectInputType, DataType, autodetectDataType } from './b2x'
 
-function arrayToHex(arr: Uint8Array | number[]): string {
-  return [...arr].map((num) => num.toString(16).padStart(2, '0')).join(' ')
-}
+import HexOutput from './components/HexOutput.vue'
+
+import {
+  hexToBytes,
+  base64ToBytes,
+  bytesToUTF8,
+  InputType,
+  autodetectInputType,
+  DataType,
+  autodetectDataType,
+} from './b2x'
 
 const input = ref(
   '\\x0a0c08b498f6bb0610eca0f6bb062a0b120234302a0530343331302a0b120234302a0530393434302a0b120234302a0530353038352a0b120234302a0530333634302a0b1202343' +
@@ -45,16 +52,9 @@ const data = computed(() => {
   if (inputType.value == InputType[InputType.Hexadecimal]) {
     return hexToBytes(val) || []
   } else if (inputType.value == InputType[InputType.Base64]) {
-    if (typeof window !== 'undefined') {
-      const binary = window.atob(input.value)
-      const array = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i++) {
-        array[i] = binary.charCodeAt(i)
-      }
-      return array
-    } else {
-      return Buffer.from(input.value, 'base64')
-    }
+    return base64ToBytes(input.value)
+  } else if (inputType.value == InputType[InputType.Base64URL]) {
+    return base64ToBytes(input.value, true)
   }
   return new TextEncoder().encode(val)
 })
@@ -68,7 +68,6 @@ const output = computed(() => {
 })
 
 const hasBom = computed(() => {
-  console.log(data.value)
   return data.value.length >= 3 && data.value[0] == 0xef && data.value[1] == 0xbb && data.value[2] == 0xbf
 })
 
@@ -90,7 +89,9 @@ const outputBytes = computed(() => {
 </script>
 
 <template>
-  <header></header>
+  <header>
+    <h1>Binary to Sanity</h1>
+  </header>
 
   <main>
     <div class="left">
@@ -120,11 +121,21 @@ const outputBytes = computed(() => {
     </div>
     <div class="middle">
       <h2>Hex Representation</h2>
-      <div class="output">{{ arrayToHex(data) }}</div>
+      <div class="output"><HexOutput :items="data" :printASCII="false" /></div>
+      <h3>Copy to Clipboard</h3>
+      <button>As Hex (aabbcc)</button><br />
+      <button>As Hex (aa bb cc)</button><br />
+      <button>As Hex (\xAABBCC)</button><br />
+      <button>As Base 64</button><br />
+      <button>As Base 64 URL</button>
+    </div>
+    <div class="middle2">
+      <h2>ASCII-ish Representation</h2>
+      <div class="output"><HexOutput :items="data" :printASCII="true" /></div>
     </div>
     <div class="right">
       <h2>Text Representation</h2>
-      <div class="output" v-html="output"></div>
+      <div class="output"><div class="text-output" v-html="output"></div></div>
       <h3>Output Metadata</h3>
       <div class="meta">Detected Data Type: {{ dataType }}</div>
       <div class="meta">{{ outputCharacters }} characters</div>
