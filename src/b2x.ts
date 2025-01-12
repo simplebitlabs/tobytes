@@ -59,6 +59,7 @@ enum InputType {
   Base64URL,
   ASCII,
   UTF8,
+  UTF8DE,
 }
 
 function autodetectInputType(input: string): InputType {

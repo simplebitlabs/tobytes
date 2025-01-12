@@ -40,6 +40,9 @@ const data = computed(() => {
     return base64ToBytes(input.value)
   } else if (inputType.value == InputType[InputType.Base64URL]) {
     return base64ToBytes(input.value, true)
+  } else if (inputType.value == InputType[InputType.UTF8DE]) {
+    const newVal = new TextDecoder().decode(Uint8Array.from(val, (c) => c.charCodeAt(0)))
+    return new TextEncoder().encode(newVal)
   }
   return new TextEncoder().encode(val)
 })
@@ -102,6 +105,7 @@ const outputBytes = computed(() => {
           <option>URL Encoded</option>
           <option value="ASCII">ASCII Text</option>
           <option value="UTF8">UTF-8 Text</option>
+          <option value="UTF8DE">UTF-8 Text, Double Encoded</option>
           <option>ISO-8859-1 Text</option>
           <option>Windows-1252 (CP-1252) Text</option>
         </select>
