@@ -83,6 +83,31 @@ test('autodetectValidUTF8', () => {
 
   const cp1252AsBytes = base64ToBytes(cp1252base64)
   expect(autodetectValidUTF8(cp1252AsBytes)).toBe(false)
+
+  const lotsOfCharacters =
+    'Hello! 👋 ⭐ 💀 ⛷️ pidió κόσμε déçu þjófum イロハニホヘト Съешь ฌานสมาธิ გვიპყრობდა օճառաջուր trång Zażółć'
+  const lotsofBytes = new TextEncoder().encode(lotsOfCharacters)
+  expect(autodetectValidUTF8(lotsofBytes)).toBe(true)
+
+  // single byte invalid sequences
+  expect(autodetectValidUTF8(new Uint8Array([0xc0]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xc1]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xf7]))).toBe(false)
+  // continuation byte with nothing before it
+  expect(autodetectValidUTF8(new Uint8Array([0x80]))).toBe(false)
+  // first byte with nothing after it
+  expect(autodetectValidUTF8(new Uint8Array([0xe0]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xe1]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xed]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xee]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xf0]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xf1]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xf4]))).toBe(false)
+  // our friend the BOM is a valid string
+  expect(autodetectValidUTF8(new Uint8Array([0xef, 0xbb, 0xbf]))).toBe(true)
+  // various "overlong encodings" should be seen as invalid
+  expect(autodetectValidUTF8(new Uint8Array([0xc0, 0xaf]))).toBe(false)
+  expect(autodetectValidUTF8(new Uint8Array([0xe0, 0x9f, 0x80]))).toBe(false)
 })
 
 test('autodetectDoubleEncoded', () => {

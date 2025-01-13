@@ -11,6 +11,7 @@ import {
   InputType,
   friendlyInputType,
   autodetectInputType,
+  autodetectValidUTF8,
   autodetectDoubleEncoded,
   friendlyDataType,
   autodetectDataType,
@@ -57,6 +58,10 @@ const data = computed(() => {
     output = Uint8Array.from(secondDecode, (c) => c.charCodeAt(0))
   }
   return output
+})
+
+const inputIsValidUTF8 = computed(() => {
+  return autodetectValidUTF8(dataBeforeDoubleEncoding.value)
 })
 
 const inputDoubleEncoded = computed(() => {
@@ -173,6 +178,7 @@ async function copyToClipboard() {
       </div>
       <div class="meta">{{ inputCharacters }} characters</div>
       <div class="meta">{{ inputBytes }} bytes encoded as UTF-8</div>
+      <div class="meta">{{ inputIsValidUTF8 ? '✅' : '❌' }} Looks like valid UTF-8</div>
       <div class="meta">
         {{ inputDoubleEncoded ? '✅' : '❌' }} Looks like
         <a href="https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf"

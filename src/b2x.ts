@@ -116,21 +116,86 @@ function autodetectInputType(input: string): InputType {
 }
 
 function autodetectValidUTF8(input: Uint8Array): boolean {
-  // TODO: this is nowhere near complete
-  for (let i = 0; i < input.length; i++) {
-    // UTF-8 encoding never uses bytes > 0xF5, so if we find one, it's probably not UTF-8.
-    // 0xC0 and 0xC1 are also not valid.
-    // https://en.wikipedia.org/wiki/UTF-8#Byte_map
-    if (input[i] == 0xc0 || input[i] == 0xc1 || input[i] >= 0xf5) {
+  const between = (b: number, lower: number, upper: number) => b >= lower && b <= upper
+  const continuation = (b: number) => b >= 0x80 && b <= 0xbf
+
+  for (let i = 0; i < input.length; ) {
+    const i0 = input[i]
+    // these characters are never present in valid UTF-8
+    if (i0 == 0xc0 || i0 == 0xc1 || i0 >= 0xf5) {
+      return false
+    }
+    // 7-bit ASCII characters are OK
+    if (i0 < 0x80) {
+      i++
+    } else if (between(i0, 0xc2, 0xdf)) {
+      if (i >= input.length - 1 || !continuation(input[i + 1])) {
+        return false
+      }
+      i += 2
+    } else if (i0 == 0xe0) {
+      if (i >= input.length - 2 || !between(input[i + 1], 0xa0, 0xbf) || !continuation(input[i + 2])) {
+        return false
+      }
+      i += 3
+    } else if (between(i0, 0xe1, 0xec)) {
+      if (i >= input.length - 2 || !continuation(input[i + 1]) || !continuation(input[i + 2])) {
+        return false
+      }
+      i += 3
+    } else if (i0 == 0xed) {
+      if (i >= input.length - 2 || !between(input[i + 1], 0x80, 0x9f) || !continuation(input[i + 2])) {
+        return false
+      }
+      i += 3
+    } else if (between(i0, 0xee, 0xef)) {
+      if (i >= input.length - 2 || !continuation(input[i + 1]) || !continuation(input[i + 2])) {
+        return false
+      }
+      i += 3
+    } else if (i0 == 0xf0) {
+      if (
+        i >= input.length - 3 ||
+        !between(input[i + 1], 0x90, 0xbf) ||
+        !continuation(input[i + 2]) ||
+        !continuation(input[i + 3])
+      ) {
+        return false
+      }
+      i += 4
+    } else if (between(i0, 0xf1, 0xf3)) {
+      if (
+        i >= input.length - 3 ||
+        !continuation(input[i + 1]) ||
+        !continuation(input[i + 2]) ||
+        !continuation(input[i + 3])
+      ) {
+        return false
+      }
+      i += 4
+    } else if (i0 == 0xf4) {
+      if (
+        i >= input.length - 3 ||
+        !between(input[i + 1], 0x80, 0x8f) ||
+        !continuation(input[i + 2]) ||
+        !continuation(input[i + 3])
+      ) {
+        return false
+      }
+      i += 4
+    } else {
+      // anything else, such as a continuation byte, makes this invalid UTF-8
       return false
     }
   }
+
   return true
 }
 
 function autodetectDoubleEncoded(input: Uint8Array): boolean {
   const between = (b: number, lower: number, upper: number) => b >= lower && b <= upper
   const continuation = (b: number) => b >= 0x80 && b <= 0xbf
+
   // the basic pattern is "C3 xx C2 xx" for many of these.
   // Derived from the regex at https://blogs.perl.org/users/chansen/2010/10/coping-with-double-encoded-utf-8.html
   for (let i = 0; i < input.length - 3; i++) {
