@@ -27,7 +27,7 @@ function hexToBytes(hex: string): number[] | undefined {
     ?.map((byte) => parseInt(byte, 16))
 }
 
-function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array | number[] {
+function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
   // TODO: handle missing padding, here and in base64
   if (typeof window !== 'undefined') {
     let val = base64
@@ -43,6 +43,22 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array |
   } else {
     return Buffer.from(base64, urlFormat ? 'base64url' : 'base64')
   }
+}
+
+function bytesToBase64(bytes: number[] | Uint8Array, urlFormat: boolean = false): string {
+  let base64 = ''
+  // TODO: handle missing padding, here and in base64
+  if (typeof window !== 'undefined') {
+    const asString = Array.from(bytes, (b) => String.fromCodePoint(b)).join('')
+    base64 = window.btoa(asString)
+    if (urlFormat) {
+      base64 = base64.replace(/\+/g, '-').replace(/\//g, '_')
+    }
+  } else {
+    const buf = Buffer.from(bytes)
+    base64 = buf.toString(urlFormat ? 'base64url' : 'base64')
+  }
+  return base64
 }
 
 function bytesToUTF8(bytes: number[] | Uint8Array, doubleEncoded: boolean = false): string {
@@ -155,6 +171,7 @@ export {
   debounce,
   hexToBytes,
   base64ToBytes,
+  bytesToBase64,
   bytesToUTF8,
   InputType,
   friendlyInputType,

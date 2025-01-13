@@ -6,11 +6,11 @@ import HexOutput from './components/HexOutput.vue'
 import {
   hexToBytes,
   base64ToBytes,
+  bytesToBase64,
   bytesToUTF8,
   InputType,
   friendlyInputType,
   autodetectInputType,
-  DataType,
   friendlyDataType,
   autodetectDataType,
 } from './b2x'
@@ -82,33 +82,38 @@ const outputBytes = computed(() => {
   return data.value.length
 })
 
+function hexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean) {
+  const text = [...data].map((b) => b.toString(16).padStart(2, '0')).join(spacer)
+  if (uppercase) return text.toUpperCase()
+  return text
+}
+
 async function copyToClipboard() {
   let text = ''
   switch (clipboardCopyType.value) {
     case 'utf8':
       text = output.value
       break
+    case 'base64':
+      text = bytesToBase64(data.value, false)
+      break
+    case 'base64url':
+      text = bytesToBase64(data.value, true)
+      break
     case 'lowerhex':
-      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join('')
+      text = hexHelper(data.value, '', false)
       break
     case 'upperhex':
-      text = [...data.value]
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
-        .toUpperCase()
+      text = hexHelper(data.value, '', true)
       break
     case 'lowerhexspace':
-      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join(' ')
+      text = hexHelper(data.value, ' ', false)
       break
     case 'upperhexspace':
-      text = [...data.value]
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join(' ')
-        .toUpperCase()
+      text = hexHelper(data.value, ' ', true)
       break
     case 'postgresbytea':
-      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join('')
-      text = '\\x' + text
+      text = '\\x' + hexHelper(data.value, '', false)
       break
   }
   try {
@@ -174,6 +179,8 @@ async function copyToClipboard() {
       <button @click="copyToClipboard">Copy</button> Format:
       <select v-model="clipboardCopyType">
         <option value="utf8">UTF-8 Text</option>
+        <option value="base64">Base 64</option>
+        <option value="base64url">Base 64 URL</option>
         <option value="lowerhex">Hex (aabb11cc)</option>
         <option value="upperhex">Hex (AABB11CC)</option>
         <option value="lowerhexspace">Hex (aa bb 11 cc)</option>

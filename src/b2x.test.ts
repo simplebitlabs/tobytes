@@ -1,6 +1,15 @@
-import { expect, test } from 'vitest'
+import { assert, expect, test } from 'vitest'
 
-import { hexToBytes, bytesToUTF8, InputType, autodetectInputType, DataType, autodetectDataType } from './b2x'
+import {
+  hexToBytes,
+  base64ToBytes,
+  bytesToBase64,
+  bytesToUTF8,
+  InputType,
+  autodetectInputType,
+  DataType,
+  autodetectDataType,
+} from './b2x'
 
 test('hexToBytes', () => {
   expect(hexToBytes('68656c6c6f0a')).toEqual([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a])
@@ -8,6 +17,20 @@ test('hexToBytes', () => {
   expect(hexToBytes('0x68656c6c6f0a')).toEqual([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a])
   expect(hexToBytes('68 65 6c 6c 6f 0a')).toEqual([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a])
   expect(hexToBytes('not hex')).toBeUndefined()
+})
+
+test('base64ToBytes', () => {
+  const asBytes = base64ToBytes('SGVsbG8hIPCfkYsK')
+  assert.deepEqual(Array.from(asBytes), [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x20, 0xf0, 0x9f, 0x91, 0x8b, 0x0a])
+})
+
+test('bytesToBase64', () => {
+  expect(bytesToBase64([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x20, 0xf0, 0x9f, 0x91, 0x8b, 0x0a])).toBe(
+    'SGVsbG8hIPCfkYsK',
+  )
+  // test regular and URL variant - test string is "~~~~~~" which triggers differences
+  expect(bytesToBase64(new Uint8Array(6).fill(0x7e), false)).toBe('fn5+fn5+')
+  expect(bytesToBase64(new Uint8Array(6).fill(0x7e), true)).toBe('fn5-fn5-')
 })
 
 test('bytesToUTF8', () => {
