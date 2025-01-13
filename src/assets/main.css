@@ -55,7 +55,13 @@ textarea.input {
 }
 
 .hex-output .p {
-  color: black;
+  color: #100c08;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hex-output .p {
+    color: whitesmoke;
+  }
 }
 
 .hex-output .sp {
