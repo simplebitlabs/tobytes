@@ -45,11 +45,15 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array |
   }
 }
 
-function bytesToUTF8(bytes: number[] | Uint8Array): string {
+function bytesToUTF8(bytes: number[] | Uint8Array, doubleEncoded: boolean = false): string {
   // ignoreBOM == false actually means... skip the BOM, not include it
   // for our purposes, we want to keep all bytes present in the input
   const decoder = new TextDecoder('utf-8', { ignoreBOM: true })
-  return decoder.decode(new Uint8Array(bytes))
+  let str = decoder.decode(new Uint8Array(bytes))
+  if (doubleEncoded) {
+    str = decoder.decode(Uint8Array.from(str, (c) => c.charCodeAt(0)))
+  }
+  return str
 }
 
 enum InputType {
@@ -60,6 +64,20 @@ enum InputType {
   ASCII,
   UTF8,
   UTF8DE,
+}
+
+const inputTypeNames: Record<InputType, string> = {
+  [InputType.Unknown]: 'Unknown',
+  [InputType.Hexadecimal]: 'Hexadecimal',
+  [InputType.Base64]: 'Base 64',
+  [InputType.Base64URL]: 'Base 64 URL',
+  [InputType.ASCII]: 'ASCII',
+  [InputType.UTF8]: 'UTF-8',
+  [InputType.UTF8DE]: 'UTF-8, Double Encoded',
+}
+
+function friendlyInputType(value: InputType): string {
+  return inputTypeNames[value] || InputType[value]
 }
 
 function autodetectInputType(input: string): InputType {
@@ -105,6 +123,17 @@ enum DataType {
   //Windows1252,
 }
 
+const dataTypeNames: Record<DataType, string> = {
+  [DataType.Unknown]: 'Unknown',
+  [DataType.Binary]: 'Binary',
+  [DataType.ASCII]: 'ASCII',
+  [DataType.UTF8]: 'UTF-8',
+}
+
+function friendlyDataType(value: DataType): string {
+  return dataTypeNames[value] || DataType[value]
+}
+
 function autodetectDataType(bytes: number[] | Uint8Array): DataType {
   // printable characters + horizontal tab, LF, CR
   const ascii = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
@@ -127,7 +156,9 @@ export {
   base64ToBytes,
   bytesToUTF8,
   InputType,
+  friendlyInputType,
   autodetectInputType,
   DataType,
+  friendlyDataType,
   autodetectDataType,
 }

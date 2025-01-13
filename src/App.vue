@@ -8,8 +8,10 @@ import {
   base64ToBytes,
   bytesToUTF8,
   InputType,
+  friendlyInputType,
   autodetectInputType,
   DataType,
+  friendlyDataType,
   autodetectDataType,
 } from './b2x'
 
@@ -19,9 +21,9 @@ const inputTypeManual = ref(InputType[InputType.Unknown])
 
 const inputType = computed(() => {
   if (inputTypeManual.value != InputType[InputType.Unknown]) {
-    return inputTypeManual.value
+    return InputType[inputTypeManual.value as keyof typeof InputType]
   }
-  return InputType[autodetectInputType(input.value)]
+  return autodetectInputType(input.value)
 })
 
 const inputCharacters = computed(() => {
@@ -34,13 +36,13 @@ const inputBytes = computed(() => {
 
 const data = computed(() => {
   const val = input.value
-  if (inputType.value == InputType[InputType.Hexadecimal]) {
+  if (inputType.value == InputType.Hexadecimal) {
     return hexToBytes(val) || []
-  } else if (inputType.value == InputType[InputType.Base64]) {
+  } else if (inputType.value == InputType.Base64) {
     return base64ToBytes(input.value)
-  } else if (inputType.value == InputType[InputType.Base64URL]) {
+  } else if (inputType.value == InputType.Base64URL) {
     return base64ToBytes(input.value, true)
-  } else if (inputType.value == InputType[InputType.UTF8DE]) {
+  } else if (inputType.value == InputType.UTF8DE) {
     const newVal = new TextDecoder().decode(Uint8Array.from(val, (c) => c.charCodeAt(0)))
     return new TextEncoder().encode(newVal)
   }
@@ -48,13 +50,13 @@ const data = computed(() => {
 })
 
 const dataType = computed(() => {
-  return DataType[autodetectDataType(data.value)]
+  return autodetectDataType(data.value)
 })
 
 const displayASCII = ref(false)
 const displayControlCharacters = ref(false)
 const displayCodePoints = ref(false)
-const clipboardCopyType = ref('lowerhex')
+const clipboardCopyType = ref('utf8')
 
 const output = computed(() => {
   return bytesToUTF8(data.value)
@@ -79,6 +81,42 @@ const nonBMP = computed(() => {
 const outputBytes = computed(() => {
   return data.value.length
 })
+
+async function copyToClipboard() {
+  let text = ''
+  switch (clipboardCopyType.value) {
+    case 'utf8':
+      text = output.value
+      break
+    case 'lowerhex':
+      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join('')
+      break
+    case 'upperhex':
+      text = [...data.value]
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .toUpperCase()
+      break
+    case 'lowerhexspace':
+      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join(' ')
+      break
+    case 'upperhexspace':
+      text = [...data.value]
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' ')
+        .toUpperCase()
+      break
+    case 'postgresbytea':
+      text = [...data.value].map((b) => b.toString(16).padStart(2, '0')).join('')
+      text = '\\x' + text
+      break
+  }
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch (err) {
+    console.error('Cannot copy to clipboard:', err)
+  }
+}
 </script>
 
 <template>
@@ -91,23 +129,23 @@ const outputBytes = computed(() => {
       <h2>Input</h2>
       <textarea class="input" v-model="input"></textarea>
       <h3>Input Metadata</h3>
-      <div class="meta">Detected Data Type: {{ inputType }}</div>
+      <div class="meta">Detected Data Type: {{ friendlyInputType(inputType) }}</div>
       <div class="meta">
         Choose a different type:
         <select v-model="inputTypeManual">
           <option value="Unknown">Autodetect</option>
-          <option>Base 36</option>
+          <!--<option>Base 36</option>-->
           <option value="Base64">Base 64</option>
           <option value="Base64URL">Base 64 URL</option>
-          <option>C Escaped</option>
+          <!--<option>C Escaped</option>-->
           <option value="Hexadecimal">Hexadecimal (Base 16)</option>
-          <option>JWT</option>
-          <option>URL Encoded</option>
+          <!--<option>JWT</option>-->
+          <!--<option>URL Encoded</option>-->
           <option value="ASCII">ASCII Text</option>
           <option value="UTF8">UTF-8 Text</option>
           <option value="UTF8DE">UTF-8 Text, Double Encoded</option>
-          <option>ISO-8859-1 Text</option>
-          <option>Windows-1252 (CP-1252) Text</option>
+          <!--<option>ISO-8859-1 Text</option>-->
+          <!--<option>Windows-1252 (CP-1252) Text</option>-->
         </select>
       </div>
       <div class="meta">{{ inputCharacters }} characters</div>
@@ -133,8 +171,9 @@ const outputBytes = computed(() => {
       <input type="checkbox" id="hex-cp" name="hex-cp" v-model="displayCodePoints" />
       <label for="hex-cp"> Use Unicode Code Points, Not Bytes</label><br />
       <h3>Copy to Clipboard</h3>
-      <button>Copy</button> Format:
+      <button @click="copyToClipboard">Copy</button> Format:
       <select v-model="clipboardCopyType">
+        <option value="utf8">UTF-8 Text</option>
         <option value="lowerhex">Hex (aabb11cc)</option>
         <option value="upperhex">Hex (AABB11CC)</option>
         <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
@@ -146,7 +185,7 @@ const outputBytes = computed(() => {
       <h2>Output Text</h2>
       <div class="output"><div class="text-output" v-html="output"></div></div>
       <h3>Output Metadata</h3>
-      <div class="meta">Detected Data Type: {{ dataType }}</div>
+      <div class="meta">Detected Data Type: {{ friendlyDataType(dataType) }}</div>
       <div class="meta">{{ outputCharacters }} characters</div>
       <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
       <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>
