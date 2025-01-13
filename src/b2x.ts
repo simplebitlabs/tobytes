@@ -137,6 +137,10 @@ function autodetectInputType(input: string): InputType {
   return InputType.UTF8
 }
 
+// TODO: add support for autodetecting Double Encoded UTF-8
+// https://blogs.perl.org/users/chansen/2010/10/coping-with-double-encoded-utf-8.html
+// https://metacpan.org/pod/Encode::DoubleEncodedUTF8
+
 enum DataType {
   Unknown = 0,
   Binary,
