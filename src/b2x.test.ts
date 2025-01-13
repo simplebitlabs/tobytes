@@ -7,6 +7,8 @@ import {
   bytesToUTF8,
   InputType,
   autodetectInputType,
+  autodetectValidUTF8,
+  autodetectDoubleEncoded,
   DataType,
   autodetectDataType,
 } from './b2x'
@@ -17,6 +19,7 @@ test('hexToBytes', () => {
   expect(hexToBytes('0x68656c6c6f0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))
   expect(hexToBytes('68 65 6c 6c 6f 0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))
   expect(hexToBytes('not hex')).toBeUndefined()
+  expect(hexToBytes('12 34 5')).toBeUndefined() // not an even number of hex digits
 })
 
 test('base64ToBytes', () => {
@@ -66,6 +69,64 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('~')).toBe(InputType.ASCII)
   expect(autodetectInputType('✅')).toBe(InputType.UTF8)
   expect(autodetectInputType('👋 👋')).toBe(InputType.UTF8) // this emoji is outside the Unicode BMP
+})
+
+test('autodetectValidUTF8', () => {
+  const original = 'Benjamín pidió una bebida de kiwi y fresa. Noé, sin vergüenza, la más exquisita champaña del menú.'
+  // encoded to CP1252 via this command:
+  // echo $str | iconv -f UTF-8 -t CP1252 | base64
+  const cp1252base64 =
+    'QmVuamFt7W4gcGlkafMgdW5hIGJlYmlkYSBkZSBraXdpIHkgZnJlc2EuIE5v6Swgc2luIHZlcmf8ZW56YSwgbGEgbeFzIGV4cXVpc2l0YSBjaGFtcGHxYSBkZWwgbWVu+i4K'
+
+  const originalAsBytes = new TextEncoder().encode(original)
+  expect(autodetectValidUTF8(originalAsBytes)).toBe(true)
+
+  const cp1252AsBytes = base64ToBytes(cp1252base64)
+  expect(autodetectValidUTF8(cp1252AsBytes)).toBe(false)
+})
+
+test('autodetectDoubleEncoded', () => {
+  const e = (input: string) => new TextEncoder().encode(input)
+
+  const de = function (input: string) {
+    const firstEncode = [...e(input)].map((b: number) => String.fromCharCode(b)).join('')
+    return e(firstEncode)
+  }
+
+  // sanity check our helper functions
+  expect(e('👋')).length(4)
+  expect(de('👋')).length(8)
+  expect(de('👋')).toEqual(new Uint8Array([0xc3, 0xb0, 0xc2, 0x9f, 0xc2, 0x91, 0xc2, 0x8b]))
+
+  expect(autodetectDoubleEncoded(e('¿Si o Sí?'))).toBe(false)
+  const si_double_encoded = new Uint8Array([
+    0xc3, 0x82, 0xc2, 0xbf, 0x53, 0x69, 0x20, 0x6f, 0x20, 0x53, 0xc3, 0x83, 0xc2, 0xad, 0x3f,
+  ])
+  expect(autodetectDoubleEncoded(si_double_encoded)).toBe(true)
+
+  const testStrings = [
+    'Hello! 👋',
+    '⭐',
+    '💀',
+    '⛷️',
+    'κόσμε',
+    'déçu',
+    'þjófum',
+    'イロハニホヘト',
+    'Съешь',
+    'أزرق',
+    'מאוכזב',
+    'ฌานสมาธิ',
+    'გვიპყრობდა',
+    'օճառաջուր',
+    'trång',
+    'Zażółć',
+  ]
+
+  for (const str of testStrings) {
+    expect(autodetectDoubleEncoded(e(str))).toBe(false)
+    expect(autodetectDoubleEncoded(de(str))).toBe(true)
+  }
 })
 
 test('autodetectDataType', () => {

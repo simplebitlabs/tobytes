@@ -11,6 +11,7 @@ import {
   InputType,
   friendlyInputType,
   autodetectInputType,
+  autodetectDoubleEncoded,
   friendlyDataType,
   autodetectDataType,
 } from './b2x'
@@ -34,29 +35,44 @@ const inputBytes = computed(() => {
   return new TextEncoder().encode(input.value).length
 })
 
-const data = computed(() => {
+const dataBeforeDoubleEncoding = computed(() => {
   const val = input.value
+  let output: Uint8Array
   if (inputType.value == InputType.Hexadecimal) {
-    return hexToBytes(val) || []
+    output = hexToBytes(val) || new Uint8Array(0)
   } else if (inputType.value == InputType.Base64) {
-    return base64ToBytes(input.value)
+    output = base64ToBytes(input.value)
   } else if (inputType.value == InputType.Base64URL) {
-    return base64ToBytes(input.value, true)
-  } else if (inputType.value == InputType.UTF8DE) {
-    const newVal = new TextDecoder().decode(Uint8Array.from(val, (c) => c.charCodeAt(0)))
-    return new TextEncoder().encode(newVal)
+    output = base64ToBytes(input.value, true)
+  } else {
+    output = new TextEncoder().encode(val)
   }
-  return new TextEncoder().encode(val)
+  return output
 })
 
-const dataType = computed(() => {
-  return autodetectDataType(data.value)
+const data = computed(() => {
+  let output = dataBeforeDoubleEncoding.value
+  if (interpretAsDoubleEncoded.value) {
+    const secondDecode = new TextDecoder().decode(output)
+    output = Uint8Array.from(secondDecode, (c) => c.charCodeAt(0))
+  }
+  return output
 })
+
+const inputDoubleEncoded = computed(() => {
+  return autodetectDoubleEncoded(dataBeforeDoubleEncoding.value)
+})
+
+const interpretAsDoubleEncoded = ref(false)
 
 const displayASCII = ref(false)
 const displayControlCharacters = ref(false)
 const displayCodePoints = ref(false)
 const clipboardCopyType = ref('utf8')
+
+const dataType = computed(() => {
+  return autodetectDataType(data.value)
+})
 
 const output = computed(() => {
   return bytesToUTF8(data.value)
@@ -112,6 +128,9 @@ async function copyToClipboard() {
     case 'upperhexspace':
       text = hexHelper(data.value, ' ', true)
       break
+    case 'hexarray':
+      text = '[' + [...data.value].map((b) => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ']'
+      break
     case 'postgresbytea':
       text = '\\x' + hexHelper(data.value, '', false)
       break
@@ -148,13 +167,20 @@ async function copyToClipboard() {
           <!--<option>URL Encoded</option>-->
           <option value="ASCII">ASCII Text</option>
           <option value="UTF8">UTF-8 Text</option>
-          <option value="UTF8DE">UTF-8 Text, Double Encoded</option>
           <!--<option>ISO-8859-1 Text</option>-->
           <!--<option>Windows-1252 (CP-1252) Text</option>-->
         </select>
       </div>
       <div class="meta">{{ inputCharacters }} characters</div>
       <div class="meta">{{ inputBytes }} bytes encoded as UTF-8</div>
+      <div class="meta">
+        {{ inputDoubleEncoded ? '✅' : '❌' }} Looks like
+        <a href="https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf"
+          >Double Encoded UTF-8</a
+        >
+      </div>
+      <input type="checkbox" id="utf8-de" name="utf8-de" v-model="interpretAsDoubleEncoded" />
+      <label for="utf8-de"> Interpret as Double Encoded UTF-8</label><br />
     </div>
     <div class="middle">
       <h2>Raw Bytes</h2>
@@ -186,6 +212,7 @@ async function copyToClipboard() {
         <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
         <option value="upperhexspace">Hex (AA BB 11 CC)</option>
         <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
+        <option value="hexarray">Hex Array ([0xaa, 0xbb, 0x11, 0xcc])</option>
       </select>
     </div>
     <div class="right">
@@ -197,13 +224,12 @@ async function copyToClipboard() {
       <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
       <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>
       <div class="meta">
-        Starts with the <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>:
-        {{ hasBom ? '✅' : '❌' }}
+        {{ hasBom ? '✅' : '❌' }} Starts with the
+        <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>
       </div>
       <div class="meta">
-        Uses characters outside the
-        <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane">BMP</a>:
-        {{ nonBMP ? '✅' : '❌' }}
+        {{ nonBMP ? '✅' : '❌' }} Uses characters outside the
+        <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane">BMP</a>
       </div>
     </div>
   </main>

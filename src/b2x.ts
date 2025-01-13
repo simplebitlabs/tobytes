@@ -1,19 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined
-
-  return function (...args: Parameters<T>) {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    timeoutId = setTimeout(() => {
-      fn(...args)
-      timeoutId = undefined
-    }, delay)
-  }
-}
-
 function hexToBytes(hex: string): Uint8Array | undefined {
   if (hex.startsWith('\\x') || hex.startsWith('0x')) {
     hex = hex.slice(2)
@@ -68,15 +52,11 @@ function bytesToBase64(bytes: number[] | Uint8Array, urlFormat: boolean = false)
   return base64
 }
 
-function bytesToUTF8(bytes: number[] | Uint8Array, doubleEncoded: boolean = false): string {
+function bytesToUTF8(bytes: number[] | Uint8Array): string {
   // ignoreBOM == false actually means... skip the BOM, not include it
   // for our purposes, we want to keep all bytes present in the input
   const decoder = new TextDecoder('utf-8', { ignoreBOM: true })
-  let str = decoder.decode(new Uint8Array(bytes))
-  if (doubleEncoded) {
-    str = decoder.decode(Uint8Array.from(str, (c) => c.charCodeAt(0)))
-  }
-  return str
+  return decoder.decode(new Uint8Array(bytes))
 }
 
 enum InputType {
@@ -86,7 +66,6 @@ enum InputType {
   Base64URL,
   ASCII,
   UTF8,
-  UTF8DE,
 }
 
 const inputTypeNames: Record<InputType, string> = {
@@ -96,7 +75,6 @@ const inputTypeNames: Record<InputType, string> = {
   [InputType.Base64URL]: 'Base 64 URL',
   [InputType.ASCII]: 'ASCII',
   [InputType.UTF8]: 'UTF-8',
-  [InputType.UTF8DE]: 'UTF-8, Double Encoded',
 }
 
 function friendlyInputType(value: InputType): string {
@@ -137,8 +115,70 @@ function autodetectInputType(input: string): InputType {
   return InputType.UTF8
 }
 
+function autodetectValidUTF8(input: Uint8Array): boolean {
+  // TODO: this is nowhere near complete
+  for (let i = 0; i < input.length; i++) {
+    // UTF-8 encoding never uses bytes > 0xF5, so if we find one, it's probably not UTF-8.
+    // 0xC0 and 0xC1 are also not valid.
+    // https://en.wikipedia.org/wiki/UTF-8#Byte_map
+    if (input[i] == 0xc0 || input[i] == 0xc1 || input[i] >= 0xf5) {
+      return false
+    }
+  }
+  return true
+}
+
+function autodetectDoubleEncoded(input: Uint8Array): boolean {
+  const between = (b: number, lower: number, upper: number) => b >= lower && b <= upper
+  const continuation = (b: number) => b >= 0x80 && b <= 0xbf
+  // the basic pattern is "C3 xx C2 xx" for many of these.
+  // Derived from the regex at https://blogs.perl.org/users/chansen/2010/10/coping-with-double-encoded-utf-8.html
+  for (let i = 0; i < input.length - 3; i++) {
+    if (input[i] != 0xc3 || input[i + 2] != 0xc2) {
+      continue
+    }
+    const i1 = input[i + 1]
+    const i3 = input[i + 3]
+    // 4 byte sequence
+    if (between(i1, 0x82, 0x9f) && continuation(i3)) {
+      return true
+    }
+    // 6 byte sequences
+    if (i < input.length - 5 && input[i + 4] == 0xc2) {
+      const i5 = input[i + 5]
+      if (i1 == 0xa0 && between(i3, 0xa0, 0xbf) && continuation(i5)) {
+        return true
+      }
+      if (between(i1, 0xa1, 0xac) && continuation(i3) && continuation(i5)) {
+        return true
+      }
+      if (i1 == 0xad && between(i3, 0x80, 0x9f) && continuation(i5)) {
+        return true
+      }
+      if (between(i1, 0xae, 0xaf) && continuation(i3) && continuation(i5)) {
+        return true
+      }
+      // 8 byte sequences
+      if (i < input.length - 7 && input[i + 6] == 0xc2) {
+        const i7 = input[i + 7]
+        if (i1 == 0xb0 && between(i3, 0x90, 0xbf) && continuation(i5) && continuation(i7)) {
+          return true
+        }
+        if (between(i1, 0xb1, 0xb3) && continuation(i3) && continuation(i5) && continuation(i7)) {
+          return true
+        }
+        if (i1 == 0xb4 && between(i3, 0x80, 0x8f) && continuation(i5) && continuation(i7)) {
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
 // TODO: add support for autodetecting Double Encoded UTF-8
 // https://blogs.perl.org/users/chansen/2010/10/coping-with-double-encoded-utf-8.html
+// https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf
 // https://metacpan.org/pod/Encode::DoubleEncodedUTF8
 
 enum DataType {
@@ -179,7 +219,6 @@ function autodetectDataType(bytes: number[] | Uint8Array): DataType {
 }
 
 export {
-  debounce,
   hexToBytes,
   base64ToBytes,
   bytesToBase64,
@@ -187,6 +226,8 @@ export {
   InputType,
   friendlyInputType,
   autodetectInputType,
+  autodetectValidUTF8,
+  autodetectDoubleEncoded,
   DataType,
   friendlyDataType,
   autodetectDataType,
