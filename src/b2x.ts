@@ -14,17 +14,24 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300)
   }
 }
 
-function hexToBytes(hex: string): number[] | undefined {
+function hexToBytes(hex: string): Uint8Array | undefined {
   if (hex.startsWith('\\x') || hex.startsWith('0x')) {
     hex = hex.slice(2)
   }
   if (!/^[a-fA-F0-9 \r\n\t]+$/.test(hex)) {
     return undefined
   }
-  return hex
-    .replace(/\s+/g, '') // Remove whitespace
-    .match(/.{2}/g) // Split into pairs
-    ?.map((byte) => parseInt(byte, 16))
+  // remove whitespace before we ensure the length is right
+  const cleaned = hex.replace(/\s+/g, '')
+  if (cleaned.length % 2 !== 0) {
+    console.warn('input looked like hex, but was odd length')
+    return undefined
+  }
+  const array = new Uint8Array(cleaned.length / 2)
+  for (let i = 0; i < array.length; i++) {
+    array[i] = parseInt(cleaned.substring(i * 2, i * 2 + 2), 16)
+  }
+  return array
 }
 
 function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
