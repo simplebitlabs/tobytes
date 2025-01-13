@@ -95,7 +95,7 @@ function autodetectInputType(input: string): InputType {
       base64ToBytes(input)
       return InputType.Base64
     } catch (error) {
-      console.log('base64 decode failed, not assuming string is base64')
+      console.info('base64 decode failed, not assuming string is base64', error)
     }
   }
   if (/^[a-zA-Z0-9-_ \r\n\t]+=?=?$/.test(input)) {
@@ -104,9 +104,10 @@ function autodetectInputType(input: string): InputType {
       base64ToBytes(input, true)
       return InputType.Base64URL
     } catch (error) {
-      console.log('base64 decode failed, not assuming string is base64')
+      console.info('base64 decode failed, not assuming string is base64', error)
     }
   }
+  // oxlint-disable-next-line no-control-regex
   if (/^[\x00-\x7F]*$/.test(input)) {
     return InputType.ASCII
   }
