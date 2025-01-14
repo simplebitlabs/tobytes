@@ -93,8 +93,10 @@ test('autodetectValidUTF8', () => {
   expect(autodetectValidUTF8(new Uint8Array([0xc0]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xc1]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xf7]))).toBe(false)
+
   // continuation byte with nothing before it
   expect(autodetectValidUTF8(new Uint8Array([0x80]))).toBe(false)
+
   // first byte with nothing after it
   expect(autodetectValidUTF8(new Uint8Array([0xe0]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xe1]))).toBe(false)
@@ -103,11 +105,19 @@ test('autodetectValidUTF8', () => {
   expect(autodetectValidUTF8(new Uint8Array([0xf0]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xf1]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xf4]))).toBe(false)
-  // our friend the BOM is a valid string
-  expect(autodetectValidUTF8(new Uint8Array([0xef, 0xbb, 0xbf]))).toBe(true)
+
   // various "overlong encodings" should be seen as invalid
   expect(autodetectValidUTF8(new Uint8Array([0xc0, 0xaf]))).toBe(false)
   expect(autodetectValidUTF8(new Uint8Array([0xe0, 0x9f, 0x80]))).toBe(false)
+
+  // our friend the BOM is a valid string
+  expect(autodetectValidUTF8(new Uint8Array([0xef, 0xbb, 0xbf]))).toBe(true)
+
+  // unicode non-characters U+FFFE and U+FFFF should be seen as OK, as UTF requires it
+  expect(autodetectValidUTF8(new Uint8Array([0xef, 0xbf, 0xbe]))).toBe(true)
+  expect(autodetectValidUTF8(new Uint8Array([0xef, 0xbf, 0xbf]))).toBe(true)
+  // same thing for U+10FFFF, also the last possible character in Unicode
+  expect(autodetectValidUTF8(new Uint8Array([0xf4, 0x8f, 0xbf, 0xbf]))).toBe(true)
 })
 
 test('autodetectDoubleEncoded', () => {
@@ -120,6 +130,7 @@ test('autodetectDoubleEncoded', () => {
 
   // sanity check our helper functions
   expect(e('👋')).length(4)
+  expect(e('👋')).toEqual(new Uint8Array([0xf0, 0x9f, 0x91, 0x8b]))
   expect(de('👋')).length(8)
   expect(de('👋')).toEqual(new Uint8Array([0xc3, 0xb0, 0xc2, 0x9f, 0xc2, 0x91, 0xc2, 0x8b]))
 
@@ -146,6 +157,7 @@ test('autodetectDoubleEncoded', () => {
     'օճառաջուր',
     'trång',
     'Zażółć',
+    'ပင်မစာမျက်နှာ',
   ]
 
   for (const str of testStrings) {
