@@ -6,7 +6,6 @@ import HexOutput from './components/HexOutput.vue'
 import {
   hexToBytes,
   base64ToBytes,
-  bytesToBase64,
   bytesToUTF8,
   InputType,
   friendlyInputType,
@@ -15,6 +14,7 @@ import {
   autodetectDoubleEncoded,
   friendlyDataType,
   autodetectDataType,
+  exportData,
 } from './b2x'
 
 const input = ref('SGVsbG8hIPCfkYsK')
@@ -103,43 +103,8 @@ const outputBytes = computed(() => {
   return data.value.length
 })
 
-function hexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean) {
-  const text = [...data].map((b) => b.toString(16).padStart(2, '0')).join(spacer)
-  if (uppercase) return text.toUpperCase()
-  return text
-}
-
 async function copyToClipboard() {
-  let text = ''
-  switch (clipboardCopyType.value) {
-    case 'utf8':
-      text = output.value
-      break
-    case 'base64':
-      text = bytesToBase64(data.value, false)
-      break
-    case 'base64url':
-      text = bytesToBase64(data.value, true)
-      break
-    case 'lowerhex':
-      text = hexHelper(data.value, '', false)
-      break
-    case 'upperhex':
-      text = hexHelper(data.value, '', true)
-      break
-    case 'lowerhexspace':
-      text = hexHelper(data.value, ' ', false)
-      break
-    case 'upperhexspace':
-      text = hexHelper(data.value, ' ', true)
-      break
-    case 'hexarray':
-      text = '[' + [...data.value].map((b) => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ']'
-      break
-    case 'postgresbytea':
-      text = '\\x' + hexHelper(data.value, '', false)
-      break
-  }
+  const text = exportData(clipboardCopyType.value, data.value)
   try {
     await navigator.clipboard.writeText(text)
   } catch (err) {

@@ -283,6 +283,46 @@ function autodetectDataType(bytes: number[] | Uint8Array): DataType {
   return DataType.Unknown
 }
 
+function exportHexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean) {
+  const text = [...data].map((b) => b.toString(16).padStart(2, '0')).join(spacer)
+  if (uppercase) return text.toUpperCase()
+  return text
+}
+
+function exportData(copyType: string, data: Uint8Array): string {
+  let text = ''
+  switch (copyType) {
+    case 'utf8':
+      text = bytesToUTF8(data)
+      break
+    case 'base64':
+      text = bytesToBase64(data, false)
+      break
+    case 'base64url':
+      text = bytesToBase64(data, true)
+      break
+    case 'lowerhex':
+      text = exportHexHelper(data, '', false)
+      break
+    case 'upperhex':
+      text = exportHexHelper(data, '', true)
+      break
+    case 'lowerhexspace':
+      text = exportHexHelper(data, ' ', false)
+      break
+    case 'upperhexspace':
+      text = exportHexHelper(data, ' ', true)
+      break
+    case 'hexarray':
+      text = '[' + [...data].map((b) => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ']'
+      break
+    case 'postgresbytea':
+      text = '\\x' + exportHexHelper(data, '', false)
+      break
+  }
+  return text
+}
+
 export {
   hexToBytes,
   base64ToBytes,
@@ -296,4 +336,5 @@ export {
   DataType,
   friendlyDataType,
   autodetectDataType,
+  exportData,
 }
