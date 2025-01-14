@@ -20,12 +20,16 @@ function value(b: number, ascii: boolean, ctrl: boolean): string {
     }
   }
   if (ascii) {
-    if (b == 0x09) {
+    if (b == 0x08) {
+      return '\\b'
+    } else if (b == 0x09) {
       return '\\t'
     } else if (b == 0x0a) {
       return '\\n'
     } else if (b == 0x0b) {
       return '\\v'
+    } else if (b == 0x0c) {
+      return '\\f'
     } else if (b == 0x0d) {
       return '\\r'
     } else if (b == 0x20) {
