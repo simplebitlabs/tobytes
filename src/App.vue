@@ -48,7 +48,7 @@ const dataBeforeDoubleEncoding = computed(() => {
     } else {
       output = new TextEncoder().encode(val)
     }
-  } catch (e) {
+  } catch {
     console.warn('error decoding input, falling back to text')
     output = new TextEncoder().encode(val)
   }

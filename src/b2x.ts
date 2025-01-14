@@ -97,35 +97,40 @@ function friendlyInputType(value: InputType): string {
   return inputTypeNames[value] || InputType[value]
 }
 
+function canConvert(callback: () => void): boolean {
+  try {
+    callback()
+    return true
+  } catch (e) {
+    if (e instanceof ConversionError) {
+      console.debug('autodetect failed:', e.message)
+    } else {
+      throw e
+    }
+  }
+  return false
+}
+
 function autodetectInputType(input: string): InputType {
   let inputForHex = input
   if (input.startsWith('0x') || input.startsWith('\\x')) {
     inputForHex = input.slice(2)
   }
   if (/^[a-fA-F0-9 \r\n\t]+$/.test(inputForHex)) {
-    try {
-      hexToBytes(inputForHex)
+    if (canConvert(() => hexToBytes(inputForHex))) {
       return InputType.Hexadecimal
-    } catch (e) {
-      console.info('autodetect as hex failed')
     }
   }
   if (/^[A-Za-z0-9+/ \r\n\t]+=?=?[ \r\n\t]*$/.test(input)) {
     // TODO: detect and report missing or invalid padding based on length
-    try {
-      base64ToBytes(input)
+    if (canConvert(() => base64ToBytes(input, false))) {
       return InputType.Base64
-    } catch (e) {
-      console.info('autodetect as base64 failed')
     }
   }
   if (/^[a-zA-Z0-9-_ \r\n\t]+=?=?$/.test(input)) {
     // TODO: detect and report missing or invalid padding based on length
-    try {
-      base64ToBytes(input, true)
-      return InputType.Base64URL
-    } catch (e) {
-      console.info('autodetect as base64url failed')
+    if (canConvert(() => base64ToBytes(input, true))) {
+      return InputType.Base64
     }
   }
   // oxlint-disable-next-line no-control-regex
