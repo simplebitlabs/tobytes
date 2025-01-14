@@ -130,7 +130,7 @@ function autodetectInputType(input: string): InputType {
   if (/^[a-zA-Z0-9-_ \r\n\t]+=?=?$/.test(input)) {
     // TODO: detect and report missing or invalid padding based on length
     if (canConvert(() => base64ToBytes(input, true))) {
-      return InputType.Base64
+      return InputType.Base64URL
     }
   }
   // oxlint-disable-next-line no-control-regex
