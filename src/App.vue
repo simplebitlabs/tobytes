@@ -38,13 +38,18 @@ const inputBytes = computed(() => {
 const dataBeforeDoubleEncoding = computed(() => {
   const val = input.value
   let output: Uint8Array
-  if (inputType.value == InputType.Hexadecimal) {
-    output = hexToBytes(val) || new Uint8Array(0)
-  } else if (inputType.value == InputType.Base64) {
-    output = base64ToBytes(input.value)
-  } else if (inputType.value == InputType.Base64URL) {
-    output = base64ToBytes(input.value, true)
-  } else {
+  try {
+    if (inputType.value == InputType.Hexadecimal) {
+      output = hexToBytes(val)
+    } else if (inputType.value == InputType.Base64) {
+      output = base64ToBytes(input.value)
+    } else if (inputType.value == InputType.Base64URL) {
+      output = base64ToBytes(input.value, true)
+    } else {
+      output = new TextEncoder().encode(val)
+    }
+  } catch (e) {
+    console.warn('error decoding input, falling back to text')
     output = new TextEncoder().encode(val)
   }
   return output
@@ -106,8 +111,8 @@ async function copyToClipboard() {
   const text = exportData(clipboardCopyType.value, data.value)
   try {
     await navigator.clipboard.writeText(text)
-  } catch (err) {
-    console.error('Cannot copy to clipboard:', err)
+  } catch (e) {
+    console.error('Cannot copy to clipboard:', e)
   }
 }
 </script>

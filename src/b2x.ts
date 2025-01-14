@@ -1,15 +1,22 @@
-function hexToBytes(hex: string): Uint8Array | undefined {
+class ConversionError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ConversionError'
+    Object.setPrototypeOf(this, ConversionError.prototype)
+  }
+}
+
+function hexToBytes(hex: string): Uint8Array {
   if (hex.startsWith('\\x') || hex.startsWith('0x')) {
     hex = hex.slice(2)
   }
   if (!/^[a-fA-F0-9 \r\n\t]+$/.test(hex)) {
-    return undefined
+    throw new ConversionError('not hex')
   }
   // remove whitespace before we ensure the length is right
   const cleaned = hex.replace(/\s+/g, '')
   if (cleaned.length % 2 !== 0) {
-    console.warn('input looked like hex, but was odd length')
-    return undefined
+    throw new ConversionError('not hex (odd length)')
   }
   const array = new Uint8Array(cleaned.length / 2)
   for (let i = 0; i < array.length; i++) {
@@ -25,7 +32,16 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
     if (urlFormat) {
       val = base64.replace(/-/g, '+').replace(/_/g, '/')
     }
-    const binary = window.atob(val)
+    let binary: string
+    try {
+      binary = window.atob(val)
+    } catch (e) {
+      if (e instanceof Error && e.name === 'InvalidCharacterError') {
+        throw new ConversionError(urlFormat ? 'not base64url' : 'not base64')
+      } else {
+        throw e
+      }
+    }
     const array = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) {
       array[i] = binary.charCodeAt(i)
@@ -87,16 +103,20 @@ function autodetectInputType(input: string): InputType {
     inputForHex = input.slice(2)
   }
   if (/^[a-fA-F0-9 \r\n\t]+$/.test(inputForHex)) {
-    // Hexadecimal input without '0x' or '\x' prefix
-    return InputType.Hexadecimal
+    try {
+      hexToBytes(inputForHex)
+      return InputType.Hexadecimal
+    } catch (e) {
+      console.info('autodetect as hex failed')
+    }
   }
   if (/^[A-Za-z0-9+/ \r\n\t]+=?=?[ \r\n\t]*$/.test(input)) {
     // TODO: detect and report missing or invalid padding based on length
     try {
       base64ToBytes(input)
       return InputType.Base64
-    } catch (error) {
-      console.info('base64 decode failed, not assuming string is base64', error)
+    } catch (e) {
+      console.info('autodetect as base64 failed')
     }
   }
   if (/^[a-zA-Z0-9-_ \r\n\t]+=?=?$/.test(input)) {
@@ -104,8 +124,8 @@ function autodetectInputType(input: string): InputType {
     try {
       base64ToBytes(input, true)
       return InputType.Base64URL
-    } catch (error) {
-      console.info('base64 decode failed, not assuming string is base64', error)
+    } catch (e) {
+      console.info('autodetect as base64url failed')
     }
   }
   // oxlint-disable-next-line no-control-regex
@@ -190,6 +210,7 @@ function exportData(copyType: string, data: Uint8Array): string {
 }
 
 export {
+  ConversionError,
   hexToBytes,
   base64ToBytes,
   bytesToBase64,

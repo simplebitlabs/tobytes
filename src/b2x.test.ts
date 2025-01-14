@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 
 import {
+  ConversionError,
   hexToBytes,
   base64ToBytes,
   bytesToBase64,
@@ -17,14 +18,18 @@ test('hexToBytes', () => {
   expect(hexToBytes('\\x68656c6c6f0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))
   expect(hexToBytes('0x68656c6c6f0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))
   expect(hexToBytes('68 65 6c 6c 6f 0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))
-  expect(hexToBytes('not hex')).toBeUndefined()
-  expect(hexToBytes('12 34 5')).toBeUndefined() // not an even number of hex digits
+  expect(() => hexToBytes('not hex')).toThrow(ConversionError)
+  expect(() => hexToBytes('12 34 5')).toThrow(ConversionError) // not an even number of hex digits
 })
 
 test('base64ToBytes', () => {
   expect(base64ToBytes('SGVsbG8hIPCfkYsK')).toEqual(
     new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x20, 0xf0, 0x9f, 0x91, 0x8b, 0x0a]),
   )
+
+  expect(() => base64ToBytes('z')).toThrow(ConversionError)
+  expect(() => base64ToBytes('z=z')).toThrow(ConversionError)
+  expect(() => base64ToBytes('z', true)).toThrow(ConversionError)
 })
 
 test('bytesToBase64', () => {
