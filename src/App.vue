@@ -10,12 +10,11 @@ import {
   InputType,
   friendlyInputType,
   autodetectInputType,
-  autodetectValidUTF8,
-  autodetectDoubleEncoded,
   friendlyDataType,
   autodetectDataType,
   exportData,
 } from './b2x'
+import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
 
 const input = ref('SGVsbG8hIPCfkYsK')
 
@@ -61,11 +60,11 @@ const data = computed(() => {
 })
 
 const inputIsValidUTF8 = computed(() => {
-  return autodetectValidUTF8(dataBeforeDoubleEncoding.value)
+  return isValidUTF8(dataBeforeDoubleEncoding.value)
 })
 
 const inputDoubleEncoded = computed(() => {
-  return autodetectDoubleEncoded(dataBeforeDoubleEncoding.value)
+  return doubleEncodedUTF8(dataBeforeDoubleEncoding.value)
 })
 
 const interpretAsDoubleEncoded = ref(false)
