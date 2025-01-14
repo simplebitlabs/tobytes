@@ -9,6 +9,7 @@ import {
   autodetectInputType,
   DataType,
   autodetectDataType,
+  exportData,
 } from './b2x'
 
 test('hexToBytes', () => {
@@ -77,4 +78,17 @@ test('autodetectDataType', () => {
   expect(autodetectDataType(e('check: ✅'))).toBe(DataType.UTF8)
   expect(autodetectDataType(e('wave: 👋'))).toBe(DataType.UTF8)
   expect(autodetectDataType(e('adiós'))).toBe(DataType.UTF8)
+})
+
+test('exportData', () => {
+  const abc_text = new Uint8Array([0x41, 0x42, 0x43]) // all caps ABC
+  expect(exportData('utf8', abc_text)).toBe('ABC')
+  expect(exportData('base64', abc_text)).toBe('QUJD')
+  expect(exportData('base64url', abc_text)).toBe('QUJD')
+  expect(exportData('lowerhex', abc_text)).toBe('414243')
+  expect(exportData('upperhex', abc_text)).toBe('414243')
+  expect(exportData('lowerhexspace', abc_text)).toBe('41 42 43')
+  expect(exportData('upperhexspace', abc_text)).toBe('41 42 43')
+  expect(exportData('hexarray', abc_text)).toBe('[0x41, 0x42, 0x43]')
+  expect(exportData('postgresbytea', abc_text)).toBe('\\x414243')
 })
