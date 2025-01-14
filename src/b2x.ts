@@ -32,7 +32,7 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
     }
     return array
   } else {
-    return Buffer.from(base64, urlFormat ? 'base64url' : 'base64')
+    return new Uint8Array(Buffer.from(base64, urlFormat ? 'base64url' : 'base64'))
   }
 }
 
