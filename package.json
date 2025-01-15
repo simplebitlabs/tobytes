@@ -16,6 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@picocss/pico": "^2.0.6",
     "vue": "^3.5.13"
   },
   "devDependencies": {

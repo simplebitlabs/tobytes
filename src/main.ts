@@ -1,3 +1,4 @@
+import '@picocss/pico/css/pico.min.css'
 import './assets/main.css'
 
 import { createApp } from 'vue'

@@ -138,7 +138,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header>
-    <h1>Binary to Sanity</h1>
+    <h1>🔎 Binary to Sanity</h1>
   </header>
 
   <main>
@@ -146,10 +146,10 @@ onBeforeUnmount(() => {
       <h2>Input</h2>
       <textarea class="input" v-model="input"></textarea>
       <h3>Input Metadata</h3>
-      <div class="meta">Detected Data Type: {{ friendlyInputType(inputType) }}</div>
+      <div class="meta">Detected input type: {{ friendlyInputType(inputType) }}</div>
       <div class="meta">
-        Choose a different type:
-        <select v-model="inputTypeManual">
+        <label for="input-type-manual">Choose a different type:</label>
+        <select id="input-type-manual" v-model="inputTypeManual">
           <option value="Unknown">Autodetect</option>
           <!--<option>Base 36</option>-->
           <option value="Base64">Base 64</option>
@@ -173,11 +173,11 @@ onBeforeUnmount(() => {
           >Double Encoded UTF-8</a
         >
       </div>
-      <input type="checkbox" id="utf8-de" name="utf8-de" v-model="interpretAsDoubleEncoded" />
+      <input type="checkbox" id="utf8-de" name="utf8-de" role="switch" v-model="interpretAsDoubleEncoded" />
       <label for="utf8-de"> Interpret as Double Encoded UTF-8</label><br />
     </div>
     <div class="middle">
-      <h2>Raw Bytes</h2>
+      <h2>Raw</h2>
       <div class="output">
         <HexOutput
           :items="data"
@@ -187,36 +187,38 @@ onBeforeUnmount(() => {
         />
       </div>
       <h3>Display Options</h3>
-      <input type="checkbox" id="hex-ascii" name="hex-ascii" v-model="displayASCII" />
-      <label for="hex-ascii"> Display ASCII printable characters</label><br />
-      <input type="checkbox" id="hex-cc" name="hex-cc" v-model="displayControlCharacters" />
+      <input type="checkbox" id="hex-ascii" name="hex-ascii" role="switch" v-model="displayASCII" />
+      <label for="hex-ascii"> Show ASCII printable characters</label><br />
+      <input type="checkbox" id="hex-cc" name="hex-cc" role="switch" v-model="displayControlCharacters" />
       <label for="hex-cc">
-        Use Unicode <a href="https://en.wikipedia.org/wiki/Control_Pictures">Control Character Pictures</a></label
+        Show Unicode <a href="https://en.wikipedia.org/wiki/Control_Pictures">Control Character Pictures</a></label
       ><br />
-      <input type="checkbox" id="hex-cp" name="hex-cp" v-model="displayCodePoints" />
-      <label for="hex-cp"> Use Unicode Code Points, Not Bytes</label><br />
+      <input type="checkbox" id="hex-cp" name="hex-cp" role="switch" v-model="displayCodePoints" />
+      <label for="hex-cp"> Show Unicode Code Points, Not Bytes</label><br />
       <h3>Copy to Clipboard</h3>
-      <button @click="copyToClipboard">Copy</button> Format:
-      <select v-model="clipboardCopyType">
-        <option value="utf8">UTF-8 Text</option>
-        <option value="base64">Base 64</option>
-        <option value="base64url">Base 64 URL</option>
-        <option value="lowerhex">Hex (aabb11cc)</option>
-        <option value="upperhex">Hex (AABB11CC)</option>
-        <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
-        <option value="upperhexspace">Hex (AA BB 11 CC)</option>
-        <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
-        <option value="hexarray">Hex Array ([0xaa, 0xbb, 0x11, 0xcc])</option>
-      </select>
+      <fieldset role="group">
+        <select v-model="clipboardCopyType">
+          <option value="utf8">UTF-8 Text</option>
+          <option value="base64">Base 64</option>
+          <option value="base64url">Base 64 URL</option>
+          <option value="lowerhex">Hex (aabb11cc)</option>
+          <option value="upperhex">Hex (AABB11CC)</option>
+          <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
+          <option value="upperhexspace">Hex (AA BB 11 CC)</option>
+          <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
+          <option value="hexarray">Hex Array ([0xaa, 0xbb, 0x11, 0xcc])</option>
+        </select>
+        <button @click="copyToClipboard">Copy</button>
+      </fieldset>
       <Transition name="fade">
-        <div v-if="recentCopy">Copied!</div>
+        <div class="copy-hint" v-if="recentCopy">Copied!</div>
       </Transition>
     </div>
     <div class="right">
-      <h2>Output Text</h2>
+      <h2>Output</h2>
       <div class="output"><div class="text-output" v-html="output"></div></div>
       <h3>Output Metadata</h3>
-      <div class="meta">Detected Data Type: {{ friendlyDataType(dataType) }}</div>
+      <div class="meta">Detected output type: {{ friendlyDataType(dataType) }}</div>
       <div class="meta">{{ outputCharacters }} characters</div>
       <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
       <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>

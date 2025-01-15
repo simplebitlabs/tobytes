@@ -1,10 +1,18 @@
-@import './base.css';
+:root {
+  --pico-font-size: 90%;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    --pico-font-weight: 600;
+  }
+}
 
 #app {
-  /*max-width: 1280px;*/
   margin: 0 auto;
   padding: 1rem;
-  font-weight: normal;
 }
 
 @media (min-width: 1024px) {
@@ -25,35 +33,6 @@
   }
 }
 
-/* CSS-reset + styles for input-type elements */
-button,
-input,
-optgroup,
-select,
-textarea {
-  font-family: inherit;
-  font-size: 100%;
-  line-height: 1.15;
-  color: var(--color-text);
-  background: var(--color-background-mute);
-  border: var(--color-heading) solid 0.1rem;
-  border-radius: 0.3rem;
-  padding: 0.2rem 0.3rem;
-}
-
-button,
-select {
-  text-transform: none;
-}
-
-button,
-[type='button'],
-[type='reset'],
-[type='submit'] {
-  -webkit-appearance: button;
-  appearance: button;
-}
-
 main div h3 {
   margin-top: 1.5rem;
 }
@@ -65,7 +44,7 @@ textarea.input {
 
 .output {
   height: 300px;
-  font-family: monospace;
+  font-family: var(--pico-font-family-monospace);
   overflow: auto;
   overflow-wrap: anywhere;
 }
@@ -73,39 +52,38 @@ textarea.input {
 .hex-output {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
-}
 
-.hex-output.hex-8-column {
-  grid-template-columns: repeat(8, 1fr);
-}
+  &.hex-8-column {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  span::after {
+    content: ' ';
+  }
 
-.hex-output span::after {
-  content: ' ';
-}
+  .p {
+    color: var(--pico-color);
+  }
 
-.hex-output .p {
-  color: var(--color-text);
-}
+  .sp {
+    color: orange;
+  }
 
-.hex-output .sp {
-  color: orange;
-}
+  .sp2 {
+    color: orange;
+    text-decoration: underline orange dotted;
+  }
 
-.hex-output .sp2 {
-  color: orange;
-  text-decoration: underline orange dotted;
-}
+  .tb {
+    color: rgb(113, 169, 29);
+  }
 
-.hex-output .tb {
-  color: rgb(113, 169, 29);
-}
+  .nl {
+    color: blueviolet;
+  }
 
-.hex-output .nl {
-  color: blueviolet;
-}
-
-.hex-output .bn {
-  color: orangered;
+  .bn {
+    color: orangered;
+  }
 }
 
 .text-output {
@@ -119,4 +97,9 @@ textarea.input {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.copy-hint {
+  width: 100%;
+  text-align: center;
 }
