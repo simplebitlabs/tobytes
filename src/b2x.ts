@@ -6,6 +6,64 @@ class ConversionError extends Error {
   }
 }
 
+function escapeReplacer(match: string, grp: string): string {
+  switch (grp[0]) {
+    case 'a':
+      return '\x07'
+    case 'b':
+      return '\b'
+    case 'e':
+      return '\x1B'
+    case 'f':
+      return '\f'
+    case 'n':
+      return '\n'
+    case 'r':
+      return '\r'
+    case 't':
+      return '\t'
+    case 'v':
+      return '\x0B'
+    case '\\':
+      return '\\'
+    case "'":
+      return "\'"
+    case '"':
+      return '"'
+    case 'x':
+    case 'u':
+    case 'U':
+      // slice off the x/u/U prefix, and assume regex already validated the number of digits
+      const num = parseInt(grp.slice(1), 16)
+      if (!isNaN(num) && num <= 0x10ffff) {
+        return String.fromCodePoint(num)
+      } else {
+        // for now, just ignore out of range characters and pass through original match
+        return match
+      }
+    default:
+      // handles octal escapes, which have no prefix
+      if (grp.length <= 3 && /^\d+$/.test(grp)) {
+        const num = parseInt(grp, 8)
+        if (!isNaN(num) && num <= 0xff) {
+          return String.fromCodePoint(num)
+        } else {
+          // for now, just ignore out of range characters and pass through original match
+          return match
+        }
+      } else {
+        throw new ConversionError(`Invalid escape sequence: \\${grp}`)
+      }
+  }
+}
+
+function escapeSequenceToBytes(escaped: string): Uint8Array {
+  // note: C also supports \? to avoid trigraphs, but I didn't include it here
+  const escapeChars = /\\([abefnrtv\\'"]|\d{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/g
+  escaped = escaped.replaceAll(escapeChars, escapeReplacer)
+  return new TextEncoder().encode(escaped)
+}
+
 function hexToBytes(hex: string): Uint8Array {
   if (hex.startsWith('\\x') || hex.startsWith('0x')) {
     hex = hex.slice(2)
@@ -77,7 +135,8 @@ function bytesToUTF8(bytes: number[] | Uint8Array): string {
 
 enum InputType {
   Unknown = 0,
-  Hexadecimal = 1,
+  CEscape,
+  Hexadecimal,
   Base64,
   Base64URL,
   ASCII,
@@ -86,6 +145,7 @@ enum InputType {
 
 const inputTypeNames: Record<InputType, string> = {
   [InputType.Unknown]: 'Unknown',
+  [InputType.CEscape]: 'C-like Escape Sequence',
   [InputType.Hexadecimal]: 'Hexadecimal',
   [InputType.Base64]: 'Base 64',
   [InputType.Base64URL]: 'Base 64 URL',
@@ -133,6 +193,12 @@ function autodetectInputType(input: string): InputType {
       return InputType.Base64URL
     }
   }
+  if (/\\([abefnrtv\\'"]|\d{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/.test(input)) {
+    if (canConvert(() => escapeSequenceToBytes(input))) {
+      return InputType.CEscape
+    }
+  }
+
   // oxlint-disable-next-line no-control-regex
   if (/^[\x00-\x7F]*$/.test(input)) {
     return InputType.ASCII
@@ -216,6 +282,7 @@ function exportData(copyType: string, data: Uint8Array): string {
 
 export {
   ConversionError,
+  escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
   bytesToBase64,

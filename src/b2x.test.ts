@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 
 import {
   ConversionError,
+  escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
   bytesToBase64,
@@ -12,6 +13,23 @@ import {
   autodetectDataType,
   exportData,
 } from './b2x'
+
+test('escapeSequenceToBytes', () => {
+  const enc = (str: string) => new TextEncoder().encode(str)
+  expect(escapeSequenceToBytes('')).toEqual(new Uint8Array())
+  expect(escapeSequenceToBytes('\r\n')).toEqual(new Uint8Array([0x0d, 0x0a]))
+  expect(escapeSequenceToBytes('\\r\\n')).toEqual(new Uint8Array([0x0d, 0x0a]))
+
+  expect(escapeSequenceToBytes('test\\tTSV')).toEqual(enc('test\tTSV'))
+  // note that JS doesn't support \a and \e, but our conversion function does
+  expect(escapeSequenceToBytes('\\a\\b\\e\\f\\n\\r\\t\\v')).toEqual(enc('\x07\b\x1b\f\n\r\t\v'))
+  expect(escapeSequenceToBytes('\\\\\'\\"')).toEqual(enc('\\\'"'))
+
+  // the string "why?", done in a very weird way (octal, hex, short unicode, long unicode)
+  expect(escapeSequenceToBytes('\\167\\x68\\u0079\\U0000003F')).toEqual(enc('why?'))
+
+  expect(escapeSequenceToBytes('\\U0001F600')).toEqual(enc('😀'))
+})
 
 test('hexToBytes', () => {
   expect(hexToBytes('68656c6c6f0a')).toEqual(new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0a]))

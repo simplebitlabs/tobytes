@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 import HexOutput from './components/HexOutput.vue'
 
 import {
+  escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
   bytesToUTF8,
@@ -39,7 +40,9 @@ const dataBeforeDoubleEncoding = computed(() => {
   const val = input.value
   let output: Uint8Array
   try {
-    if (inputType.value == InputType.Hexadecimal) {
+    if (inputType.value == InputType.CEscape) {
+      output = escapeSequenceToBytes(val)
+    } else if (inputType.value == InputType.Hexadecimal) {
       output = hexToBytes(val)
     } else if (inputType.value == InputType.Base64) {
       output = base64ToBytes(input.value)
@@ -135,7 +138,7 @@ async function copyToClipboard() {
           <!--<option>Base 36</option>-->
           <option value="Base64">Base 64</option>
           <option value="Base64URL">Base 64 URL</option>
-          <!--<option>C Escaped</option>-->
+          <option value="CEscape">C-like Escape Sequence</option>
           <option value="Hexadecimal">Hexadecimal (Base 16)</option>
           <!--<option>JWT</option>-->
           <!--<option>URL Encoded</option>-->
