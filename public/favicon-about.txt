@@ -1,6 +1,6 @@
-This favicon was generated using the following font:
+This favicon was generated using the following graphics from Twitter Twemoji:
 
-- Font Title: Roboto Mono
-- Font Author: undefined
-- Font Source: https://fonts.gstatic.com/s/robotomono/v23/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_Of2PQ--5Ip2sSQ.ttf
-- Font License: undefined)
+- Graphics Title: 1f50e.svg
+- Graphics Author: Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
+- Graphics Source: https://github.com/twitter/twemoji/blob/master/assets/svg/1f50e.svg
+- Graphics License: CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
