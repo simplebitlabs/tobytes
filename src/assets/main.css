@@ -25,6 +25,34 @@
   }
 }
 
+/* CSS-reset + styles for input-type elements */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  color: var(--color-text);
+  background: var(--color-background-mute);
+  border: var(--color-heading) solid 0.1rem;
+  border-radius: 0.3rem;
+  padding: 0.3rem 0.6rem;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+}
+
 main div h3 {
   margin-top: 1.5rem;
 }
@@ -55,13 +83,7 @@ textarea.input {
 }
 
 .hex-output .p {
-  color: #100c08;
-}
-
-@media (prefers-color-scheme: dark) {
-  .hex-output .p {
-    color: whitesmoke;
-  }
+  color: var(--color-text);
 }
 
 .hex-output .sp {
@@ -74,7 +96,7 @@ textarea.input {
 }
 
 .hex-output .tb {
-  color: greenyellow;
+  color: rgb(113, 169, 29);
 }
 
 .hex-output .nl {
