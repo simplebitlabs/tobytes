@@ -8,8 +8,10 @@ import {
   bytesToBase64,
   bytesToUTF8,
   InputType,
+  friendlyInputType,
   autodetectInputType,
   DataType,
+  friendlyDataType,
   autodetectDataType,
   exportData,
 } from './b2x'
@@ -73,6 +75,10 @@ test('bytesToUTF8 with BOM', () => {
   expect(bytesToUTF8(input)).toBe(expectedOutput)
 })
 
+test('friendlyInputType', () => {
+  expect(friendlyInputType(InputType.CEscape)).toEqual('C-like Escape Sequence')
+})
+
 test('autodetectInputType', () => {
   expect(autodetectInputType('0xabc123')).toBe(InputType.Hexadecimal)
   expect(autodetectInputType('\\xabc123')).toBe(InputType.Hexadecimal)
@@ -93,6 +99,13 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('~')).toBe(InputType.ASCII)
   expect(autodetectInputType('✅')).toBe(InputType.UTF8)
   expect(autodetectInputType('👋 👋')).toBe(InputType.UTF8) // this emoji is outside the Unicode BMP
+
+  // looks like hex, but isn't an even number of digits
+  expect(autodetectInputType('abc12')).toBe(InputType.ASCII)
+})
+
+test('friendlyDataType', () => {
+  expect(friendlyDataType(DataType.UTF8)).toEqual('UTF-8')
 })
 
 test('autodetectDataType', () => {
