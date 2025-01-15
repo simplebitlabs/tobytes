@@ -23,7 +23,9 @@ test('escapeSequenceToBytes', () => {
   expect(escapeSequenceToBytes('test\\tTSV')).toEqual(enc('test\tTSV'))
   // note that JS doesn't support \a and \e, but our conversion function does
   expect(escapeSequenceToBytes('\\a\\b\\e\\f\\n\\r\\t\\v')).toEqual(enc('\x07\b\x1b\f\n\r\t\v'))
-  expect(escapeSequenceToBytes('\\\\\'\\"')).toEqual(enc('\\\'"'))
+  expect(escapeSequenceToBytes('\\\\')).toEqual(enc('\\'))
+  expect(escapeSequenceToBytes("\\'")).toEqual(enc("'"))
+  expect(escapeSequenceToBytes('\\"')).toEqual(enc('"'))
 
   // the string "why?", done in a very weird way (octal, hex, short unicode, long unicode)
   expect(escapeSequenceToBytes('\\167\\x68\\u0079\\U0000003F')).toEqual(enc('why?'))

@@ -23,11 +23,11 @@ function escapeReplacer(match: string, grp: string): string {
     case 't':
       return '\t'
     case 'v':
-      return '\x0B'
+      return '\v'
     case '\\':
       return '\\'
     case "'":
-      return "\'"
+      return "'"
     case '"':
       return '"'
     case 'x':
