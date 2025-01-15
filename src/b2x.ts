@@ -59,7 +59,7 @@ function escapeReplacer(match: string, grp: string): string {
 
 function escapeSequenceToBytes(escaped: string): Uint8Array {
   // note: C also supports \? to avoid trigraphs, but I didn't include it here
-  const escapeChars = /\\([abefnrtv\\'"]|\d{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/g
+  const escapeChars = /\\([abefnrtv\\'"]|[0-7]{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/g
   escaped = escaped.replaceAll(escapeChars, escapeReplacer)
   return new TextEncoder().encode(escaped)
 }
@@ -193,7 +193,7 @@ function autodetectInputType(input: string): InputType {
       return InputType.Base64URL
     }
   }
-  if (/\\([abefnrtv\\'"]|\d{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/.test(input)) {
+  if (/\\([abefnrtv\\'"]|[0-7]{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/.test(input)) {
     if (canConvert(() => escapeSequenceToBytes(input))) {
       return InputType.CEscape
     }
