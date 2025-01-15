@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 
 import HexOutput from './components/HexOutput.vue'
 
@@ -110,14 +110,30 @@ const outputBytes = computed(() => {
   return data.value.length
 })
 
-async function copyToClipboard() {
+const recentCopy = ref(false)
+let copyTimeout: ReturnType<typeof setTimeout> | undefined
+
+async function copyToClipboard(event: Event) {
+  if (copyTimeout) {
+    clearTimeout(copyTimeout)
+  }
   const text = exportData(clipboardCopyType.value, data.value)
   try {
     await navigator.clipboard.writeText(text)
+    recentCopy.value = true
+    copyTimeout = setTimeout(() => {
+      recentCopy.value = false
+    }, 1000)
   } catch (e) {
     console.error('Cannot copy to clipboard:', e)
   }
 }
+
+onBeforeUnmount(() => {
+  if (copyTimeout) {
+    clearTimeout(copyTimeout)
+  }
+})
 </script>
 
 <template>
@@ -192,6 +208,9 @@ async function copyToClipboard() {
         <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
         <option value="hexarray">Hex Array ([0xaa, 0xbb, 0x11, 0xcc])</option>
       </select>
+      <Transition name="fade">
+        <div v-if="recentCopy">Copied!</div>
+      </Transition>
     </div>
     <div class="right">
       <h2>Output Text</h2>
