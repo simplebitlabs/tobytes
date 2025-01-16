@@ -5,6 +5,7 @@ import {
   escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
+  qpToBytes,
   bytesToBase64,
   bytesToUTF8,
   InputType,
@@ -62,6 +63,12 @@ test('base64ToBytes', () => {
   expect(() => base64ToBytes('z')).toThrow(ConversionError)
   expect(() => base64ToBytes('z=z')).toThrow(ConversionError)
   expect(() => base64ToBytes('z', true)).toThrow(ConversionError)
+})
+
+test('qpToBytes', () => {
+  const input = '=E2=80=94=E2=80=89Antoine de Saint-Exup=C3=A9ry, Citadelle (1948) '
+  const output = '— Antoine de Saint-Exupéry, Citadelle (1948)'
+  expect(qpToBytes(input)).toEqual(new TextEncoder().encode(output))
 })
 
 test('bytesToBase64', () => {
