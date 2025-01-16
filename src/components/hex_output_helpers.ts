@@ -1,7 +1,7 @@
 function value(b: number, ascii: boolean, ctrl: boolean): string {
   if (ctrl) {
     if (b >= 0x00 && b <= 0x20) {
-      return String.fromCharCode(0x2400 + b)
+      return String.fromCodePoint(0x2400 + b)
     }
     if (b == 0x7f) {
       return '\u2421'
@@ -23,7 +23,7 @@ function value(b: number, ascii: boolean, ctrl: boolean): string {
     } else if (b == 0x20) {
       return '\u00a0' // non-breaking space, to allow underline style to work
     } else if (b >= 0x21 && b <= 0x7e) {
-      return String.fromCharCode(b)
+      return String.fromCodePoint(b)
     }
   }
   return b.toString(16).padStart(2, '0')

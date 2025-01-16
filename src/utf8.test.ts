@@ -17,7 +17,7 @@ test('isValidUTF8', () => {
   expect(isValidUTF8(cp1252AsBytes)).toBe(false)
 
   const lotsOfCharacters =
-    'Hello! 👋 ⭐ 💀 ⛷️ pidió κόσμε déçu þjófum イロハニホヘト Съешь ฌานสมาธิ გვიპყრობდა օճառաջուր trång Zażółć'
+    'Hello! © 👋 ⭐ 💀 ⛷️ pidió κόσμε déçu þjófum イロハニホヘト Съешь ฌานสมาธิ გვიპყრობდა օճառաջուր trång Zażółć'
   const lotsofBytes = new TextEncoder().encode(lotsOfCharacters)
   expect(isValidUTF8(lotsofBytes)).toBe(true)
 
@@ -56,7 +56,7 @@ test('autodetectDoubleEncoded', () => {
   const e = (input: string) => new TextEncoder().encode(input)
 
   const de = function (input: string) {
-    const firstEncode = [...e(input)].map((b: number) => String.fromCharCode(b)).join('')
+    const firstEncode = [...e(input)].map((b: number) => String.fromCodePoint(b)).join('')
     return e(firstEncode)
   }
 

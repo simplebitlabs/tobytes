@@ -116,7 +116,7 @@ function qpToBytes(qp: string): Uint8Array {
     .replace(/=(?:\r\n?|\n|$)/g, '')
     .replace(/=([a-fA-F0-9]{2})/g, (_, grp: string) => {
       const codePoint = parseInt(grp, 16)
-      return String.fromCharCode(codePoint)
+      return String.fromCodePoint(codePoint)
     })
   return Uint8Array.from(decoded, (c) => c.charCodeAt(0))
 }

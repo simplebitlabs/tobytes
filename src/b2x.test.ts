@@ -33,6 +33,16 @@ test('escapeSequenceToBytes', () => {
   expect(escapeSequenceToBytes('\\167\\x68\\u0079\\U0000003F')).toEqual(enc('why?'))
 
   expect(escapeSequenceToBytes('\\U0001F600')).toEqual(enc('😀'))
+
+  // test some out of range values - \377 is max octal
+  // should be interpreted as '\37' followed by '8'
+  expect(escapeSequenceToBytes('\\378')).toEqual(new Uint8Array([0o37, 0x38]))
+  // should just be passed through as is, since it is greater than 255 (decimal)
+  expect(escapeSequenceToBytes('\\477')).toEqual(enc('\\477'))
+
+  // max unicode code point is 0x10ffff, so anything bigger should just be ignored
+  expect(escapeSequenceToBytes('\\U0010FFFF')).toEqual(new Uint8Array([0xf4, 0x8f, 0xbf, 0xbf]))
+  expect(escapeSequenceToBytes('\\U00110000')).toEqual(enc('\\U00110000'))
 })
 
 test('hexToBytes', () => {
@@ -84,6 +94,7 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('\\xabc123')).toBe(InputType.Hexadecimal)
   expect(autodetectInputType('abc123')).toBe(InputType.Hexadecimal)
   expect(autodetectInputType('ab c1 23')).toBe(InputType.Hexadecimal)
+
   expect(autodetectInputType('bGlnaHQgd29y')).toBe(InputType.Base64)
   expect(autodetectInputType('bGlnaHQgdw==')).toBe(InputType.Base64)
   // line wraps shouldn't matter
@@ -91,6 +102,7 @@ test('autodetectInputType', () => {
   expect(autodetectInputType('bGlna\nHQgdw==\n')).toBe(InputType.Base64)
   expect(autodetectInputType('fn5+fn5+')).toBe(InputType.Base64) // ~~~~~~
   expect(autodetectInputType('fn5-fn5-')).toBe(InputType.Base64URL) // ~~~~~~
+
   expect(autodetectInputType('abc123.')).toBe(InputType.ASCII)
   // TODO: get smart enough that we can say "yeah, this is text, not base64"
   // expect(autodetectInputType('The quick brown fox jumps over the lazy dog')).toBe(InputType.ASCII)
@@ -102,6 +114,10 @@ test('autodetectInputType', () => {
 
   // looks like hex, but isn't an even number of digits
   expect(autodetectInputType('abc12')).toBe(InputType.ASCII)
+
+  // note the double escaped slashes, as if the user just typed `\n` in the input
+  expect(autodetectInputType('abc\\n123')).toBe(InputType.CEscape)
+  expect(autodetectInputType('\\x20\\x20')).toBe(InputType.CEscape)
 })
 
 test('friendlyDataType', () => {

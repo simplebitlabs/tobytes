@@ -43,17 +43,17 @@ test('value', () => {
 })
 
 test('valueClass', () => {
-  expect(valueClass('a'.charCodeAt(0), false)).toBe('p')
-  expect(valueClass('a'.charCodeAt(0), true)).toBe('p')
+  expect(valueClass('a'.codePointAt(0) || -1, false)).toBe('p')
+  expect(valueClass('a'.codePointAt(0) || -1, true)).toBe('p')
 
-  expect(valueClass(' '.charCodeAt(0), false)).toBe('sp')
-  expect(valueClass(' '.charCodeAt(0), true)).toBe('sp2')
+  expect(valueClass(' '.codePointAt(0) || -1, false)).toBe('sp')
+  expect(valueClass(' '.codePointAt(0) || -1, true)).toBe('sp2')
 
-  expect(valueClass('\t'.charCodeAt(0), false)).toBe('tb')
-  expect(valueClass('\t'.charCodeAt(0), true)).toBe('tb')
+  expect(valueClass('\t'.codePointAt(0) || -1, false)).toBe('tb')
+  expect(valueClass('\t'.codePointAt(0) || -1, true)).toBe('tb')
 
-  expect(valueClass('\n'.charCodeAt(0), false)).toBe('nl')
-  expect(valueClass('\n'.charCodeAt(0), true)).toBe('nl')
+  expect(valueClass('\n'.codePointAt(0) || -1, false)).toBe('nl')
+  expect(valueClass('\n'.codePointAt(0) || -1, true)).toBe('nl')
 
   expect(valueClass(0xf0, false)).toBe('bn')
   expect(valueClass(0xf0, true)).toBe('bn')
