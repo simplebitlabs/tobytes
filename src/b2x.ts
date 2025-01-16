@@ -60,7 +60,7 @@ function escapeReplacer(match: string, grp: string): string {
 function escapeSequenceToBytes(escaped: string): Uint8Array {
   // note: C also supports \? to avoid trigraphs, but I didn't include it here
   const escapeChars = /\\([abefnrtv\\'"]|[0-7]{1,3}|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8})/g
-  escaped = escaped.replaceAll(escapeChars, escapeReplacer)
+  escaped = escaped.replace(escapeChars, escapeReplacer)
   return new TextEncoder().encode(escaped)
 }
 
@@ -110,6 +110,17 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
   }
 }
 
+function qpToBytes(qp: string): Uint8Array {
+  const decoded = qp
+    .replace(/[\t ]$/gm, '')
+    .replace(/=(?:\r\n?|\n|$)/g, '')
+    .replace(/=([a-fA-F0-9]{2})/g, (_, grp: string) => {
+      const codePoint = parseInt(grp, 16)
+      return String.fromCharCode(codePoint)
+    })
+  return Uint8Array.from(decoded, (c) => c.charCodeAt(0))
+}
+
 function bytesToBase64(bytes: number[] | Uint8Array, urlFormat: boolean = false): string {
   let base64 = ''
   // TODO: handle missing padding, here and in base64
@@ -135,22 +146,24 @@ function bytesToUTF8(bytes: number[] | Uint8Array): string {
 
 enum InputType {
   Unknown = 0,
+  ASCII,
+  UTF8,
   CEscape,
   Hexadecimal,
   Base64,
   Base64URL,
-  ASCII,
-  UTF8,
+  QuotedPrintable,
 }
 
 const inputTypeNames: Record<InputType, string> = {
   [InputType.Unknown]: 'Unknown',
+  [InputType.ASCII]: 'ASCII',
+  [InputType.UTF8]: 'UTF-8',
   [InputType.CEscape]: 'C-like Escape Sequence',
   [InputType.Hexadecimal]: 'Hexadecimal',
   [InputType.Base64]: 'Base 64',
   [InputType.Base64URL]: 'Base 64 URL',
-  [InputType.ASCII]: 'ASCII',
-  [InputType.UTF8]: 'UTF-8',
+  [InputType.QuotedPrintable]: 'Quoted Printable',
 }
 
 function friendlyInputType(value: InputType): string {
@@ -285,6 +298,7 @@ export {
   escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
+  qpToBytes,
   bytesToBase64,
   bytesToUTF8,
   InputType,

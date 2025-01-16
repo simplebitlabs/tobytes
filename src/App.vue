@@ -7,6 +7,7 @@ import {
   escapeSequenceToBytes,
   hexToBytes,
   base64ToBytes,
+  qpToBytes,
   bytesToUTF8,
   InputType,
   friendlyInputType,
@@ -48,6 +49,8 @@ const dataBeforeDoubleEncoding = computed(() => {
       output = base64ToBytes(input.value)
     } else if (inputType.value == InputType.Base64URL) {
       output = base64ToBytes(input.value, true)
+    } else if (inputType.value == InputType.QuotedPrintable) {
+      output = qpToBytes(val)
     } else {
       output = new TextEncoder().encode(val)
     }
@@ -151,15 +154,16 @@ onBeforeUnmount(() => {
         <label for="input-type-manual">Choose a different type:</label>
         <select id="input-type-manual" v-model="inputTypeManual">
           <option value="Unknown">Autodetect</option>
+          <option value="ASCII">ASCII Text</option>
+          <option value="UTF8">UTF-8 Text</option>
           <!--<option>Base 36</option>-->
           <option value="Base64">Base 64</option>
           <option value="Base64URL">Base 64 URL</option>
           <option value="CEscape">C-like Escape Sequence</option>
           <option value="Hexadecimal">Hexadecimal (Base 16)</option>
+          <option value="QuotedPrintable">Quoted Printable</option>
           <!--<option>JWT</option>-->
           <!--<option>URL Encoded</option>-->
-          <option value="ASCII">ASCII Text</option>
-          <option value="UTF8">UTF-8 Text</option>
           <!--<option>ISO-8859-1 Text</option>-->
           <!--<option>Windows-1252 (CP-1252) Text</option>-->
         </select>
