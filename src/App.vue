@@ -138,7 +138,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header>
-    <h1>🔎 Binary to Sanity</h1>
+    <h1>🔎 Binary Sanity</h1>
   </header>
 
   <main>
