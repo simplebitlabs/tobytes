@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header>
-    <h1>🔎 Binary Sanity</h1>
+    <h1>🔎 To Bytes</h1>
   </header>
 
   <main>
