@@ -15,14 +15,14 @@
   padding: 1rem;
 }
 
+header h1 {
+  text-align: center;
+}
+
 @media (min-width: 1024px) {
   body {
     display: flex;
     place-items: center;
-  }
-
-  header h1 {
-    text-align: center;
   }
 
   #app main {
