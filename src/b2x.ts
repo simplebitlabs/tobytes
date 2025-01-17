@@ -1,3 +1,5 @@
+import { isValidUTF8 } from './utf8'
+
 class ConversionError extends Error {
   constructor(message: string) {
     super(message)
@@ -222,6 +224,7 @@ function autodetectInputType(input: string): InputType {
 enum DataType {
   Unknown = 0,
   Binary,
+  ASCIIPrintable,
   ASCII,
   UTF8,
 }
@@ -229,6 +232,7 @@ enum DataType {
 const dataTypeNames: Record<DataType, string> = {
   [DataType.Unknown]: 'Unknown',
   [DataType.Binary]: 'Binary',
+  [DataType.ASCIIPrintable]: 'ASCII (Printable)',
   [DataType.ASCII]: 'ASCII',
   [DataType.UTF8]: 'UTF-8',
 }
@@ -237,20 +241,21 @@ function friendlyDataType(value: DataType): string {
   return dataTypeNames[value] || DataType[value]
 }
 
-function autodetectDataType(bytes: number[] | Uint8Array): DataType {
+function autodetectDataType(bytes: Uint8Array): DataType {
   // printable characters + horizontal tab, LF, CR
-  const ascii = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
-  // From https://en.wikipedia.org/wiki/UTF-8#Byte_map
-  const isUTF8Continuation = (b: number) => b >= 0x80 && b <= 0xbf
-  const notInUTF8 = (b: number) => b == 0xc0 || b == 0xc1 || (b >= 0xf5 && b <= 0xff)
-  if (bytes.every(ascii)) {
+  const asciiPrintable = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
+  const ascii = (b: number) => b <= 0x7f
+
+  if (bytes.length == 0) {
+    return DataType.Unknown
+  } else if (bytes.every(asciiPrintable)) {
+    return DataType.ASCIIPrintable
+  } else if (bytes.every(ascii)) {
     return DataType.ASCII
-  } else if (bytes.some(isUTF8Continuation) && !bytes.some(notInUTF8)) {
+  } else if (isValidUTF8(bytes)) {
     return DataType.UTF8
-  } else if (bytes.some((b) => (b >= 0x00 && b <= 0x1f) || b == 0x7f)) {
-    return DataType.Binary
   }
-  return DataType.Unknown
+  return DataType.Binary
 }
 
 function exportHexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean) {

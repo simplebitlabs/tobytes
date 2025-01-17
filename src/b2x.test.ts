@@ -133,12 +133,16 @@ test('friendlyDataType', () => {
 
 test('autodetectDataType', () => {
   const e = (input: string) => new TextEncoder().encode(input)
-  expect(autodetectDataType(e('hello world'))).toBe(DataType.ASCII)
-  expect(autodetectDataType(e('hello\tworld\r\n'))).toBe(DataType.ASCII)
-  expect(autodetectDataType(e('bell: \x07'))).toBe(DataType.Binary)
+
+  expect(autodetectDataType(e(''))).toBe(DataType.Unknown)
+  expect(autodetectDataType(e('hello world'))).toBe(DataType.ASCIIPrintable)
+  expect(autodetectDataType(e('hello\tworld\r\n'))).toBe(DataType.ASCIIPrintable)
+  expect(autodetectDataType(e('bell: \x07'))).toBe(DataType.ASCII)
   expect(autodetectDataType(e('check: ✅'))).toBe(DataType.UTF8)
   expect(autodetectDataType(e('wave: 👋'))).toBe(DataType.UTF8)
   expect(autodetectDataType(e('adiós'))).toBe(DataType.UTF8)
+
+  expect(autodetectDataType(new Uint8Array([0x6a, 0xc7, 0x5f, 0xb1, 0xa7, 0x5f, 0xb1, 0xd7]))).toBe(DataType.Binary)
 })
 
 test('exportData', () => {
