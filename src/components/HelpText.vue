@@ -6,6 +6,10 @@
     possible, To Bytes attempts to auto-detect your input so you don't have to fiddle around with manually specifying
     the format.
   </p>
+  <p>
+    Everything is decoded and detected <em>completely in your browser</em> - no input data is sent to a backend server
+    at any time.
+  </p>
   <h4>Supported Input Formats</h4>
   <h5>ASCII and UTF-8</h5>
   <p>
