@@ -5,7 +5,7 @@ import HelpText from './components/HelpText.vue'
 import HexOutput from './components/HexOutput.vue'
 
 import { inputToBytes, InputType, friendlyInputType, autodetectInputType } from './input'
-import { bytesToUTF8, friendlyDataType, autodetectDataType, exportData } from './output'
+import { bytesToUTF8, DataType, friendlyDataType, autodetectDataType, exportData } from './output'
 import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
 
 const input = ref('SGVsbG8hIPCfkYsK')
@@ -21,10 +21,6 @@ const inputType = computed(() => {
 
 const inputCharacters = computed(() => {
   return [...input.value].length
-})
-
-const inputBytes = computed(() => {
-  return new TextEncoder().encode(input.value).length
 })
 
 const dataBeforeDoubleEncoding = computed(() => {
@@ -120,6 +116,7 @@ onBeforeUnmount(() => {
         <h2>Input</h2>
         <textarea class="input" v-model="input"></textarea>
         <h3>Input Metadata</h3>
+        <div class="meta">{{ inputCharacters }} characters</div>
         <div class="meta">Detected input type: {{ friendlyInputType(inputType) }}</div>
         <div class="meta">
           <label for="input-type-manual">Choose a different type:</label>
@@ -139,17 +136,6 @@ onBeforeUnmount(() => {
             <!--<option>Windows-1252 (CP-1252) Text</option>-->
           </select>
         </div>
-        <div class="meta">{{ inputCharacters }} characters</div>
-        <div class="meta">{{ inputBytes }} bytes encoded as UTF-8</div>
-        <div class="meta">{{ inputIsValidUTF8 ? '✅' : '❌' }} Looks like valid UTF-8</div>
-        <div class="meta">
-          {{ inputDoubleEncoded ? '✅' : '❌' }} Looks like
-          <a href="https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf"
-            >Double Encoded UTF-8</a
-          >
-        </div>
-        <input type="checkbox" id="utf8-de" name="utf8-de" role="switch" v-model="interpretAsDoubleEncoded" />
-        <label for="utf8-de"> Interpret as Double Encoded UTF-8</label><br />
       </div>
       <div class="middle">
         <h2>Raw</h2>
@@ -161,7 +147,7 @@ onBeforeUnmount(() => {
             :printCodePoints="displayCodePoints"
           />
         </div>
-        <h3>Display Options</h3>
+        <h3>Raw Metadata and Options</h3>
         <input type="checkbox" id="hex-ascii" name="hex-ascii" role="switch" v-model="displayASCII" />
         <label for="hex-ascii"> Show ASCII printable characters</label><br />
         <input type="checkbox" id="hex-cc" name="hex-cc" role="switch" v-model="displayControlCharacters" />
@@ -170,6 +156,17 @@ onBeforeUnmount(() => {
         ><br />
         <input type="checkbox" id="hex-cp" name="hex-cp" role="switch" v-model="displayCodePoints" />
         <label for="hex-cp"> Show Unicode Code Points, Not Bytes</label><br />
+        <div class="meta">
+          <span class="yesno">{{ inputIsValidUTF8 ? '✅' : '❌' }}</span> Looks like valid UTF-8
+        </div>
+        <div class="meta">
+          <span class="yesno">{{ inputDoubleEncoded ? '✅' : '❌' }}</span> Looks like
+          <a href="https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf"
+            >Double Encoded UTF-8</a
+          >
+        </div>
+        <input type="checkbox" id="utf8-de" name="utf8-de" role="switch" v-model="interpretAsDoubleEncoded" />
+        <label for="utf8-de"> Interpret as Double Encoded UTF-8</label>
         <h3>Copy to Clipboard</h3>
         <fieldset role="group">
           <select v-model="clipboardCopyType">
@@ -193,16 +190,16 @@ onBeforeUnmount(() => {
         <h2>Output</h2>
         <div class="output"><div class="text-output" v-html="output"></div></div>
         <h3>Output Metadata</h3>
-        <div class="meta">Detected output type: {{ friendlyDataType(dataType) }}</div>
         <div class="meta">{{ outputCharacters }} characters</div>
-        <div class="meta">{{ outputBytes }} bytes encoded as UTF-8</div>
-        <div class="meta">{{ outputCodePoints }} UTF-16 code points</div>
-        <div class="meta">
-          {{ hasBom ? '✅' : '❌' }} Starts with the
+        <div class="meta">Detected output type: {{ friendlyDataType(dataType) }}</div>
+        <div class="meta" v-if="dataType == DataType.UTF8">{{ outputBytes }} bytes encoded as UTF-8</div>
+        <div class="meta" v-if="dataType == DataType.UTF8">{{ outputCodePoints }} UTF-16 code points</div>
+        <div class="meta" v-if="dataType == DataType.UTF8">
+          <span class="yesno">{{ hasBom ? '✅' : '❌' }}</span> Starts with the
           <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>
         </div>
-        <div class="meta">
-          {{ nonBMP ? '✅' : '❌' }} Uses characters outside the
+        <div class="meta" v-if="dataType == DataType.UTF8">
+          <span class="yesno">{{ nonBMP ? '✅' : '❌' }}</span> Uses characters outside the
           <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane">BMP</a>
         </div>
       </div>

@@ -58,6 +58,12 @@ textarea.input {
   height: 300px;
 }
 
+span.yesno {
+  display: inline-block;
+  width: 2em;
+  margin-inline-end: 0.5em;
+}
+
 .output {
   height: 300px;
   font-family: var(--pico-font-family-monospace);
