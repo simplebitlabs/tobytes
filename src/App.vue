@@ -5,10 +5,7 @@ import HelpText from './components/HelpText.vue'
 import HexOutput from './components/HexOutput.vue'
 
 import {
-  escapeSequenceToBytes,
-  hexToBytes,
-  base64ToBytes,
-  qpToBytes,
+  inputToBytes,
   bytesToUTF8,
   InputType,
   friendlyInputType,
@@ -39,27 +36,7 @@ const inputBytes = computed(() => {
 })
 
 const dataBeforeDoubleEncoding = computed(() => {
-  const val = input.value
-  let output: Uint8Array
-  try {
-    if (inputType.value == InputType.CEscape) {
-      output = escapeSequenceToBytes(val)
-    } else if (inputType.value == InputType.Hexadecimal) {
-      output = hexToBytes(val)
-    } else if (inputType.value == InputType.Base64) {
-      output = base64ToBytes(input.value)
-    } else if (inputType.value == InputType.Base64URL) {
-      output = base64ToBytes(input.value, true)
-    } else if (inputType.value == InputType.QuotedPrintable) {
-      output = qpToBytes(val)
-    } else {
-      output = new TextEncoder().encode(val)
-    }
-  } catch {
-    console.warn('error decoding input, falling back to text')
-    output = new TextEncoder().encode(val)
-  }
-  return output
+  return inputToBytes(input.value, inputType.value)
 })
 
 const data = computed(() => {

@@ -221,6 +221,30 @@ function autodetectInputType(input: string): InputType {
   return InputType.UTF8
 }
 
+function inputToBytes(input: string, inputType: InputType): Uint8Array {
+  const val = input
+  let output: Uint8Array
+  try {
+    if (inputType == InputType.CEscape) {
+      output = escapeSequenceToBytes(val)
+    } else if (inputType == InputType.Hexadecimal) {
+      output = hexToBytes(val)
+    } else if (inputType == InputType.Base64) {
+      output = base64ToBytes(input)
+    } else if (inputType == InputType.Base64URL) {
+      output = base64ToBytes(input, true)
+    } else if (inputType == InputType.QuotedPrintable) {
+      output = qpToBytes(val)
+    } else {
+      output = new TextEncoder().encode(val)
+    }
+  } catch {
+    console.warn('error decoding input, falling back to text')
+    output = new TextEncoder().encode(val)
+  }
+  return output
+}
+
 enum DataType {
   Unknown = 0,
   Binary,
@@ -309,6 +333,7 @@ export {
   InputType,
   friendlyInputType,
   autodetectInputType,
+  inputToBytes,
   DataType,
   friendlyDataType,
   autodetectDataType,
