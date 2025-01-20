@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { base64ToBytes } from './b2x'
+import { base64ToBytes } from './input'
 import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
 
 test('isValidUTF8', () => {

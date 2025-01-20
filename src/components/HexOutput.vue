@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 import { value, valueClass } from './hex_output_helpers'
-import { bytesToUTF8 } from './../b2x'
+import { bytesToUTF8 } from '../output'
 
 const props = defineProps<{
   items: Uint8Array | number[]

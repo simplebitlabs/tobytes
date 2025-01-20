@@ -4,16 +4,8 @@ import { ref, computed, onBeforeUnmount } from 'vue'
 import HelpText from './components/HelpText.vue'
 import HexOutput from './components/HexOutput.vue'
 
-import {
-  inputToBytes,
-  bytesToUTF8,
-  InputType,
-  friendlyInputType,
-  autodetectInputType,
-  friendlyDataType,
-  autodetectDataType,
-  exportData,
-} from './b2x'
+import { inputToBytes, InputType, friendlyInputType, autodetectInputType } from './input'
+import { bytesToUTF8, friendlyDataType, autodetectDataType, exportData } from './output'
 import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
 
 const input = ref('SGVsbG8hIPCfkYsK')
