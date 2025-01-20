@@ -1,5 +1,3 @@
-import { isValidUTF8 } from './utf8'
-
 class ConversionError extends Error {
   constructor(message: string) {
     super(message)

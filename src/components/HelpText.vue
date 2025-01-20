@@ -71,4 +71,9 @@
     your choosing. You can choose between plain text, Base64 encoded, or various Hexadecimal encoded formats. This is
     useful for debugging or sharing the decoded data with others.
   </p>
+  <p>
+    If To Bytes does not quite do what you need, you may want to try
+    <a href="https://gchq.github.io/CyberChef/">CyberChef</a>, a "Swiss Army knife" program that supports hundreds of
+    encode and decode operations and transforms.
+  </p>
 </template>
