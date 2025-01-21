@@ -29,12 +29,12 @@ function value(b: number, ascii: boolean, ctrl: boolean): string {
   return b.toString(16).padStart(2, '0')
 }
 
-function valueClass(b: number, ascii: boolean): string {
+function valueClass(b: number, spaceUnderline: boolean): string {
   if (b >= 0x21 && b <= 0x7e) {
     // printable (but not space)
     return 'p'
   } else if (b == 0x20) {
-    return ascii ? 'sp2' : 'sp'
+    return spaceUnderline ? 'spu' : 'sp'
   } else if (b == 0x09 || b == 0x0b) {
     return 'tb'
   } else if (b == 0x0a || b == 0x0d) {

@@ -22,7 +22,11 @@ const values = computed(() => {
 
 <template>
   <div class="hex-output" :class="{ 'hex-8-column': printCodePoints }">
-    <span v-for="(item, index) in values" :key="index" :class="valueClass(item, printASCII)">
+    <span
+      v-for="(item, index) in values"
+      :key="index"
+      :class="valueClass(item, printASCII && !printControlCharacters)"
+    >
       {{ value(item, printASCII, printControlCharacters) }}
     </span>
   </div>

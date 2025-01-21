@@ -47,7 +47,7 @@ test('valueClass', () => {
   expect(valueClass('a'.codePointAt(0) || -1, true)).toBe('p')
 
   expect(valueClass(' '.codePointAt(0) || -1, false)).toBe('sp')
-  expect(valueClass(' '.codePointAt(0) || -1, true)).toBe('sp2')
+  expect(valueClass(' '.codePointAt(0) || -1, true)).toBe('spu')
 
   expect(valueClass('\t'.codePointAt(0) || -1, false)).toBe('tb')
   expect(valueClass('\t'.codePointAt(0) || -1, true)).toBe('tb')

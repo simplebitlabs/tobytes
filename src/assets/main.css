@@ -87,24 +87,47 @@ span.yesno {
   }
 
   .sp {
-    color: orange;
+    color: #0550ae;
   }
 
-  .sp2 {
-    color: orange;
-    text-decoration: underline orange dotted;
+  .spu {
+    color: #0550ae;
+    text-decoration: underline #0550ae dotted;
   }
 
   .tb {
-    color: rgb(113, 169, 29);
+    color: #116329;
   }
 
   .nl {
-    color: blueviolet;
+    color: #6639ba;
   }
 
   .bn {
-    color: orangered;
+    color: #cf222e;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .sp {
+      color: #79c0ff;
+    }
+
+    .spu {
+      color: #79c0ff;
+      text-decoration: underline #79c0ff dotted;
+    }
+
+    .tb {
+      color: #56d364;
+    }
+
+    .nl {
+      color: #d2a8ff;
+    }
+
+    .bn {
+      color: #ff7b72;
+    }
   }
 }
 
