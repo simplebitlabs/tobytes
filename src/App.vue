@@ -114,12 +114,12 @@ onBeforeUnmount(() => {
     <div class="panels">
       <div class="left">
         <h2>Input</h2>
-        <textarea class="input" v-model="input"></textarea>
+        <textarea class="input" aria-label="Input text" v-model="input"></textarea>
         <h3>Input Metadata</h3>
         <div class="meta">{{ inputCharacters }} characters</div>
         <div class="meta">Detected input type: {{ friendlyInputType(inputType) }}</div>
         <div class="meta">
-          <label for="input-type-manual">Choose a different type:</label>
+          <label for="input-type-manual">Choose a different input type:</label>
           <select id="input-type-manual" v-model="inputTypeManual">
             <option value="Unknown">Autodetect</option>
             <option value="ASCII">ASCII Text</option>
@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
         <label for="utf8-de"> Interpret as Double Encoded UTF-8</label>
         <h3>Copy to Clipboard</h3>
         <fieldset role="group">
-          <select v-model="clipboardCopyType">
+          <select aria-label="Clipboard format" v-model="clipboardCopyType">
             <option value="utf8">UTF-8 Text</option>
             <option value="base64">Base 64</option>
             <option value="base64url">Base 64 URL</option>
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
             <option value="lowerhexspace">Hex (aa bb 11 cc)</option>
             <option value="upperhexspace">Hex (AA BB 11 CC)</option>
             <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
-            <option value="hexarray">Hex Array ([0xaa, 0xbb, 0x11, 0xcc])</option>
+            <option value="hexarray">Hex Array ([0xaa, 0x11, 0xcc])</option>
           </select>
           <button @click="copyToClipboard">Copy</button>
         </fieldset>
