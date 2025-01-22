@@ -31,7 +31,7 @@ const data = computed(() => {
   let output = dataBeforeDoubleEncoding.value
   if (interpretAsDoubleEncoded.value) {
     const secondDecode = new TextDecoder().decode(output)
-    output = Uint8Array.from(secondDecode, (c) => c.codePointAt(0) || -1)
+    output = Uint8Array.from(secondDecode, (c) => c.codePointAt(0) ?? -1)
   }
   return output
 })

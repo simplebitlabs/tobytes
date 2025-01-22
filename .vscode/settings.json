@@ -10,5 +10,5 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["bytea", "pico", "picocss"]
+  "cSpell.words": ["bytea", "oxlint", "pico", "picocss"]
 }

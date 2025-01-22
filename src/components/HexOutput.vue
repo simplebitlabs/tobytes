@@ -14,7 +14,7 @@ const props = defineProps<{
 const values = computed(() => {
   if (props.printCodePoints) {
     const utf8 = bytesToUTF8(props.items)
-    return [...utf8].map((c) => c.codePointAt(0) || -1)
+    return [...utf8].map((c) => c.codePointAt(0) ?? -1)
   }
   return props.items
 })

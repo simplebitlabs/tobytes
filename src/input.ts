@@ -102,7 +102,7 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
     }
     const array = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) {
-      array[i] = binary.codePointAt(i) || -1
+      array[i] = binary.codePointAt(i) ?? -1
     }
     return array
   } else {
@@ -118,7 +118,7 @@ function qpToBytes(qp: string): Uint8Array {
       const codePoint = parseInt(grp, 16)
       return String.fromCodePoint(codePoint)
     })
-  return Uint8Array.from(decoded, (c) => c.codePointAt(0) || -1)
+  return Uint8Array.from(decoded, (c) => c.codePointAt(0) ?? -1)
 }
 
 enum InputType {
