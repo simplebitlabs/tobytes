@@ -1,6 +1,14 @@
 import { expect, test } from 'vitest'
 
-import { bytesToBase64, bytesToUTF8, DataType, friendlyDataType, autodetectDataType, exportData } from './output'
+import {
+  bytesToBase64,
+  bytesToUTF8,
+  DataType,
+  friendlyDataType,
+  autodetectDataType,
+  CopyType,
+  exportData,
+} from './output'
 
 test('bytesToBase64', () => {
   expect(bytesToBase64([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x20, 0xf0, 0x9f, 0x91, 0x8b, 0x0a])).toBe(
@@ -43,13 +51,18 @@ test('autodetectDataType', () => {
 
 test('exportData', () => {
   const abc_text = new Uint8Array([0x41, 0x42, 0x43]) // all caps ABC
-  expect(exportData('utf8', abc_text)).toBe('ABC')
-  expect(exportData('base64', abc_text)).toBe('QUJD')
-  expect(exportData('base64url', abc_text)).toBe('QUJD')
-  expect(exportData('lowerhex', abc_text)).toBe('414243')
-  expect(exportData('upperhex', abc_text)).toBe('414243')
-  expect(exportData('lowerhexspace', abc_text)).toBe('41 42 43')
-  expect(exportData('upperhexspace', abc_text)).toBe('41 42 43')
-  expect(exportData('hexarray', abc_text)).toBe('[0x41, 0x42, 0x43]')
-  expect(exportData('postgresbytea', abc_text)).toBe('\\x414243')
+  expect(exportData(CopyType.UTF8, abc_text)).toBe('ABC')
+  expect(exportData(CopyType.Base64, abc_text)).toBe('QUJD')
+  expect(exportData(CopyType.Base64URL, abc_text)).toBe('QUJD')
+  expect(exportData(CopyType.LowerHex, abc_text)).toBe('414243')
+  expect(exportData(CopyType.UpperHex, abc_text)).toBe('414243')
+  expect(exportData(CopyType.LowerHexSpace, abc_text)).toBe('41 42 43')
+  expect(exportData(CopyType.UpperHexSpace, abc_text)).toBe('41 42 43')
+  expect(exportData(CopyType.HexArray, abc_text)).toBe('[0x41, 0x42, 0x43]')
+  expect(exportData(CopyType.PostgresBytea, abc_text)).toBe('\\x414243')
+  expect(exportData(CopyType.CEscape, abc_text)).toBe('"ABC"')
+
+  // Hello! 👋 (with trailing newline)
+  const hello_wave = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x20, 0xf0, 0x9f, 0x91, 0x8b, 0x0a])
+  expect(exportData(CopyType.CEscape, hello_wave)).toBe('"Hello! \\U0001f44b\\n"')
 })

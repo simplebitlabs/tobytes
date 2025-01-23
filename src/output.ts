@@ -60,44 +60,106 @@ function autodetectDataType(bytes: Uint8Array): DataType {
   return DataType.Binary
 }
 
-function exportHexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean) {
-  const text = [...data].map((b) => b.toString(16).padStart(2, '0')).join(spacer)
-  if (uppercase) return text.toUpperCase()
-  return text
+enum CopyType {
+  UTF8 = 'utf8',
+  Base64 = 'base64',
+  Base64URL = 'base64url',
+  LowerHex = 'lowerhex',
+  UpperHex = 'upperhex',
+  LowerHexSpace = 'lowerhexspace',
+  UpperHexSpace = 'upperhexspace',
+  HexArray = 'hexarray',
+  PostgresBytea = 'postgresbytea',
+  CEscape = 'cescape',
 }
 
-function exportData(copyType: string, data: Uint8Array): string {
+function assertUnreachable(_x: never): never {
+  throw new Error('Should be unreachable')
+}
+
+function exportHexHelper(data: number[] | Uint8Array, spacer: string, uppercase: boolean): string {
+  const text = [...data].map((b) => b.toString(16).padStart(2, '0')).join(spacer)
+  return uppercase ? text.toUpperCase() : text
+}
+
+const escapeMapping: Record<number, string> = {
+  0x00: '\\0', // octal escape
+  0x08: '\\b',
+  0x09: '\\t',
+  0x0a: '\\n',
+  0x0b: '\\v',
+  0x0c: '\\f',
+  0x0d: '\\r',
+  0x22: '\\"',
+  0x27: "\\'",
+  0x5c: '\\\\',
+}
+
+function cEscapeChar(c: number): string {
+  if (c in escapeMapping) {
+    return escapeMapping[c]
+  } else if (c < 0) {
+    return '\\ufffd'
+  } else if (c >= 0x20 && c <= 0x7e) {
+    return String.fromCodePoint(c)
+  } else if (c <= 0xff) {
+    return '\\x' + c.toString(16).padStart(2, '0')
+  } else if (c <= 0xffff) {
+    return '\\u' + c.toString(16).padStart(4, '0')
+  } else {
+    return '\\U' + c.toString(16).padStart(8, '0')
+  }
+}
+
+function exportCEscape(data: number[] | Uint8Array, isValidUTF8: boolean): string {
+  let chars: string[]
+  if (isValidUTF8) {
+    const utf8 = bytesToUTF8(data)
+    chars = [...utf8].map((c) => cEscapeChar(c.codePointAt(0) ?? -1))
+  } else {
+    chars = [...data].map((c) => cEscapeChar(c))
+  }
+  return '"' + chars.join('') + '"'
+}
+
+function exportData(copyType: CopyType, data: Uint8Array): string {
   let text = ''
   switch (copyType) {
-    case 'utf8':
+    case CopyType.UTF8:
       text = bytesToUTF8(data)
       break
-    case 'base64':
+    case CopyType.Base64:
       text = bytesToBase64(data, false)
       break
-    case 'base64url':
+    case CopyType.Base64URL:
       text = bytesToBase64(data, true)
       break
-    case 'lowerhex':
+    case CopyType.LowerHex:
       text = exportHexHelper(data, '', false)
       break
-    case 'upperhex':
+    case CopyType.UpperHex:
       text = exportHexHelper(data, '', true)
       break
-    case 'lowerhexspace':
+    case CopyType.LowerHexSpace:
       text = exportHexHelper(data, ' ', false)
       break
-    case 'upperhexspace':
+    case CopyType.UpperHexSpace:
       text = exportHexHelper(data, ' ', true)
       break
-    case 'hexarray':
+    case CopyType.HexArray:
       text = '[' + [...data].map((b) => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ']'
       break
-    case 'postgresbytea':
+    case CopyType.PostgresBytea:
       text = '\\x' + exportHexHelper(data, '', false)
       break
+    case CopyType.CEscape:
+      // TODO: un-hardcode the isValidUTF8 parameter
+      text = exportCEscape(data, true)
+      break
+    default:
+      assertUnreachable(copyType)
   }
   return text
 }
 
-export { bytesToBase64, bytesToUTF8, DataType, friendlyDataType, autodetectDataType, exportData }
+export { bytesToBase64, bytesToUTF8, DataType, friendlyDataType, autodetectDataType, CopyType, exportData }

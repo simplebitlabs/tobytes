@@ -5,7 +5,7 @@ import HelpText from './components/HelpText.vue'
 import HexOutput from './components/HexOutput.vue'
 
 import { inputToBytes, InputType, friendlyInputType, autodetectInputType } from './input'
-import { bytesToUTF8, DataType, friendlyDataType, autodetectDataType, exportData } from './output'
+import { bytesToUTF8, DataType, friendlyDataType, autodetectDataType, CopyType, exportData } from './output'
 import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
 
 const input = ref('SGVsbG8hIPCfkYsK')
@@ -49,7 +49,7 @@ const interpretAsDoubleEncoded = ref(false)
 const displayASCII = ref(false)
 const displayControlCharacters = ref(false)
 const displayCodePoints = ref(false)
-const clipboardCopyType = ref('utf8')
+const clipboardCopyType = ref(CopyType.UTF8)
 
 const dataType = computed(() => {
   return autodetectDataType(data.value)
@@ -179,6 +179,7 @@ onBeforeUnmount(() => {
             <option value="upperhexspace">Hex (AA BB 11 CC)</option>
             <option value="postgresbytea">Postgres Bytea (\xaabb11cc)</option>
             <option value="hexarray">Hex Array ([0xaa, 0x11, 0xcc])</option>
+            <option value="cescape">C Escaped String</option>
           </select>
           <button @click="copyToClipboard">Copy</button>
         </fieldset>
