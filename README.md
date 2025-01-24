@@ -1,39 +1,32 @@
 # To Bytes
 
-This template should help get you started developing with Vue 3 in Vite.
+To Bytes takes your binary data and turn it into something more readable. Base 64, hexadecimal, ASCII, UTF-8, C-like escape sequences, and more are supported. Double Encoded UTF-8 and byte order marks are detected.
 
-## Recommended IDE Setup
+## Development
+
+### Recommended IDE Setup - VS Code
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-## Type Support for `.vue` Imports in TS
-
 TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
 
-## Customize configuration
+### Project Commands
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+These commands assume you have a working NodeJS and npm environment set up.
 
 ```sh
+# installing necessary dependencies
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# compile and enable hot-reload for development
 npm run dev
-```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+#type-check, compile and minify for a production deployment
 npm run build
-```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
+# lint code, before commiting changes
 npm run lint
+
+# run tests
+npm run test
 ```
