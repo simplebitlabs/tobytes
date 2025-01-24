@@ -98,4 +98,7 @@ test('autodetectInputType', () => {
   // note the double escaped slashes, as if the user just typed `\n` in the input
   expect(autodetectInputType('abc\\n123')).toBe(InputType.CEscape)
   expect(autodetectInputType('\\x20\\x20')).toBe(InputType.CEscape)
+
+  expect(autodetectInputType('Exup=C3=A9ry')).toBe(InputType.QuotedPrintable)
+  expect(autodetectInputType('Line 1=\nLine2=\n')).toBe(InputType.QuotedPrintable)
 })

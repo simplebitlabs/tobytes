@@ -188,6 +188,13 @@ function autodetectInputType(input: string): InputType {
       return InputType.CEscape
     }
   }
+  // for quoted printable, we require at least two escape sequences so autodetection isn't too aggressive
+  // TODO: could also rule out QP if line length > 76 characters
+  if ((input.match(/=([A-F0-9]{2}|$)/gm) ?? []).length >= 2) {
+    if (canConvert(() => qpToBytes(input))) {
+      return InputType.QuotedPrintable
+    }
+  }
 
   // oxlint-disable-next-line no-control-regex
   if (/^[\x00-\x7F]*$/.test(input)) {
