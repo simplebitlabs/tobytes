@@ -10,6 +10,9 @@
    xml:space="preserve"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    sodipodi:docname="inkscape_open_graph.svg"
+   inkscape:export-filename="inkscape_open_graph.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -32,7 +35,8 @@
      inkscape:window-x="0"
      inkscape:window-y="38"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1" /><defs
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#ffffffff" /><defs
      id="defs1"><linearGradient
        id="linearGradient109"
        inkscape:collect="always"><stop
