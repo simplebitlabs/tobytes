@@ -6,6 +6,7 @@ import {
   hexToBytes,
   base64ToBytes,
   qpToBytes,
+  entitiesToBytes,
   InputType,
   friendlyInputType,
   autodetectInputType,
@@ -63,6 +64,12 @@ test('qpToBytes', () => {
   const input = '=E2=80=94=E2=80=89Antoine de Saint-Exup=C3=A9ry, Citadelle (1948) '
   const output = '— Antoine de Saint-Exupéry, Citadelle (1948)'
   expect(qpToBytes(input)).toEqual(new TextEncoder().encode(output))
+})
+
+test('entitiesToBytes', () => {
+  const input = 'asdf &amp; &yuml; &uuml; &apos; &#xFF; &#xFC;'
+  const output = "asdf & ÿ ü ' ÿ ü"
+  expect(entitiesToBytes(input)).toEqual(new TextEncoder().encode(output))
 })
 
 test('friendlyInputType', () => {

@@ -1,3 +1,5 @@
+import { decodeHTMLStrict } from 'entities'
+
 class ConversionError extends Error {
   constructor(message: string) {
     super(message)
@@ -100,11 +102,7 @@ function base64ToBytes(base64: string, urlFormat: boolean = false): Uint8Array {
         throw e
       }
     }
-    const array = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i++) {
-      array[i] = binary.codePointAt(i) ?? -1
-    }
-    return array
+    return Uint8Array.from(binary, (c) => c.codePointAt(0) ?? -1)
   } else {
     return new Uint8Array(Buffer.from(base64, urlFormat ? 'base64url' : 'base64'))
   }
@@ -118,7 +116,13 @@ function qpToBytes(qp: string): Uint8Array {
       const codePoint = parseInt(grp, 16)
       return String.fromCodePoint(codePoint)
     })
+  // we do not use TextEncoder here because quoted printable encodes UTF-8 encoded bytes, not codepoints
   return Uint8Array.from(decoded, (c) => c.codePointAt(0) ?? -1)
+}
+
+function entitiesToBytes(entities: string): Uint8Array {
+  const decoded = decodeHTMLStrict(entities)
+  return new TextEncoder().encode(decoded)
 }
 
 enum InputType {
@@ -130,6 +134,7 @@ enum InputType {
   Base64,
   Base64URL,
   QuotedPrintable,
+  HTMLEntities,
 }
 
 const inputTypeNames: Record<InputType, string> = {
@@ -141,6 +146,7 @@ const inputTypeNames: Record<InputType, string> = {
   [InputType.Base64]: 'Base 64',
   [InputType.Base64URL]: 'Base 64 URL',
   [InputType.QuotedPrintable]: 'Quoted Printable',
+  [InputType.HTMLEntities]: 'HTML/XML Entity Escaped',
 }
 
 function friendlyInputType(value: InputType): string {
@@ -233,6 +239,7 @@ export {
   hexToBytes,
   base64ToBytes,
   qpToBytes,
+  entitiesToBytes,
   InputType,
   friendlyInputType,
   autodetectInputType,
