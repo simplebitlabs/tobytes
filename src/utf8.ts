@@ -1,7 +1,7 @@
 const between = (b: number, lower: number, upper: number) => b >= lower && b <= upper
 const continuation = (b: number) => b >= 0x80 && b <= 0xbf
 
-function isValidUTF8(input: Uint8Array): boolean {
+function isValidUTF8(input: Uint8Array | number[]): boolean {
   for (let i = 0; i < input.length; ) {
     const i0 = input[i]
     // these characters are never present in valid UTF-8
@@ -75,7 +75,7 @@ function isValidUTF8(input: Uint8Array): boolean {
   return true
 }
 
-function doubleEncodedUTF8(input: Uint8Array): boolean {
+function doubleEncodedUTF8(input: Uint8Array | number[]): boolean {
   // https://stackoverflow.com/questions/11546351/what-character-encoding-is-c3-82-c2-bf
   // the basic pattern is "C3 xx C2 xx" for many of these.
   // Derived from the regex at https://blogs.perl.org/users/chansen/2010/10/coping-with-double-encoded-utf-8.html

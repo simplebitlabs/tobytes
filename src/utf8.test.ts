@@ -22,34 +22,34 @@ test('isValidUTF8', () => {
   expect(isValidUTF8(lotsofBytes)).toBe(true)
 
   // single byte invalid sequences
-  expect(isValidUTF8(new Uint8Array([0xc0]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xc1]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xf7]))).toBe(false)
+  expect(isValidUTF8([0xc0])).toBe(false)
+  expect(isValidUTF8([0xc1])).toBe(false)
+  expect(isValidUTF8([0xf7])).toBe(false)
 
   // continuation byte with nothing before it
-  expect(isValidUTF8(new Uint8Array([0x80]))).toBe(false)
+  expect(isValidUTF8([0x80])).toBe(false)
 
   // first byte with nothing after it
-  expect(isValidUTF8(new Uint8Array([0xe0]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xe1]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xed]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xee]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xf0]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xf1]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xf4]))).toBe(false)
+  expect(isValidUTF8([0xe0])).toBe(false)
+  expect(isValidUTF8([0xe1])).toBe(false)
+  expect(isValidUTF8([0xed])).toBe(false)
+  expect(isValidUTF8([0xee])).toBe(false)
+  expect(isValidUTF8([0xf0])).toBe(false)
+  expect(isValidUTF8([0xf1])).toBe(false)
+  expect(isValidUTF8([0xf4])).toBe(false)
 
   // various "overlong encodings" should be seen as invalid
-  expect(isValidUTF8(new Uint8Array([0xc0, 0xaf]))).toBe(false)
-  expect(isValidUTF8(new Uint8Array([0xe0, 0x9f, 0x80]))).toBe(false)
+  expect(isValidUTF8([0xc0, 0xaf])).toBe(false)
+  expect(isValidUTF8([0xe0, 0x9f, 0x80])).toBe(false)
 
   // our friend the BOM is a valid string
-  expect(isValidUTF8(new Uint8Array([0xef, 0xbb, 0xbf]))).toBe(true)
+  expect(isValidUTF8([0xef, 0xbb, 0xbf])).toBe(true)
 
   // unicode non-characters U+FFFE and U+FFFF should be seen as OK, as UTF requires it
-  expect(isValidUTF8(new Uint8Array([0xef, 0xbf, 0xbe]))).toBe(true)
-  expect(isValidUTF8(new Uint8Array([0xef, 0xbf, 0xbf]))).toBe(true)
+  expect(isValidUTF8([0xef, 0xbf, 0xbe])).toBe(true)
+  expect(isValidUTF8([0xef, 0xbf, 0xbf])).toBe(true)
   // same thing for U+10FFFF, also the last possible character in Unicode
-  expect(isValidUTF8(new Uint8Array([0xf4, 0x8f, 0xbf, 0xbf]))).toBe(true)
+  expect(isValidUTF8([0xf4, 0x8f, 0xbf, 0xbf])).toBe(true)
 })
 
 test('autodetectDoubleEncoded', () => {
@@ -67,9 +67,7 @@ test('autodetectDoubleEncoded', () => {
   expect(de('👋')).toEqual(new Uint8Array([0xc3, 0xb0, 0xc2, 0x9f, 0xc2, 0x91, 0xc2, 0x8b]))
 
   expect(doubleEncodedUTF8(e('¿Si o Sí?'))).toBe(false)
-  const si_double_encoded = new Uint8Array([
-    0xc3, 0x82, 0xc2, 0xbf, 0x53, 0x69, 0x20, 0x6f, 0x20, 0x53, 0xc3, 0x83, 0xc2, 0xad, 0x3f,
-  ])
+  const si_double_encoded = [0xc3, 0x82, 0xc2, 0xbf, 0x53, 0x69, 0x20, 0x6f, 0x20, 0x53, 0xc3, 0x83, 0xc2, 0xad, 0x3f]
   expect(doubleEncodedUTF8(si_double_encoded)).toBe(true)
 
   const testStrings = [
