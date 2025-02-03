@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest'
+import fc from 'fast-check'
 
 import { base64ToBytes } from './input'
 import { isValidUTF8, doubleEncodedUTF8 } from './utf8'
@@ -52,19 +53,37 @@ test('isValidUTF8', () => {
   expect(isValidUTF8([0xf4, 0x8f, 0xbf, 0xbf])).toBe(true)
 })
 
-test('autodetectDoubleEncoded', () => {
-  const e = (input: string) => new TextEncoder().encode(input)
+test('isValidUTF8_fastcheck', () => {
+  fc.assert(
+    fc.property(fc.string({ size: 'medium', unit: 'grapheme' }), (data) => {
+      const bytes = new TextEncoder().encode(data)
+      const valid = isValidUTF8(bytes)
+      expect(valid).toBe(true)
+    }),
+  )
+})
 
-  const de = function (input: string) {
-    const firstEncode = [...e(input)].map((b: number) => String.fromCodePoint(b)).join('')
-    return e(firstEncode)
-  }
+const e = (input: string) => new TextEncoder().encode(input)
 
+const de = function (input: string) {
+  const firstEncode = [...e(input)].map((b: number) => String.fromCodePoint(b)).join('')
+  return e(firstEncode)
+}
+
+test('ensureHelperFunctionsWork', () => {
   // sanity check our helper functions
   expect(e('👋')).length(4)
   expect(e('👋')).toEqual(new Uint8Array([0xf0, 0x9f, 0x91, 0x8b]))
   expect(de('👋')).length(8)
   expect(de('👋')).toEqual(new Uint8Array([0xc3, 0xb0, 0xc2, 0x9f, 0xc2, 0x91, 0xc2, 0x8b]))
+})
+
+test('autodetectDoubleEncoded', () => {
+  // ASCII-only strings don't show any differences when encoding multiple times, so should always be false
+  expect(doubleEncodedUTF8(e(''))).toBe(false)
+  expect(doubleEncodedUTF8(de(''))).toBe(false)
+  expect(doubleEncodedUTF8(e('abc123'))).toBe(false)
+  expect(doubleEncodedUTF8(de('abc123'))).toBe(false)
 
   expect(doubleEncodedUTF8(e('¿Si o Sí?'))).toBe(false)
   const si_double_encoded = [0xc3, 0x82, 0xc2, 0xbf, 0x53, 0x69, 0x20, 0x6f, 0x20, 0x53, 0xc3, 0x83, 0xc2, 0xad, 0x3f]
@@ -94,4 +113,14 @@ test('autodetectDoubleEncoded', () => {
     expect(doubleEncodedUTF8(e(str))).toBe(false)
     expect(doubleEncodedUTF8(de(str))).toBe(true)
   }
+})
+
+test('autodetectDoubleEncoded_fastcheck', () => {
+  fc.assert(
+    fc.property(fc.string({ minLength: 1, size: 'medium', unit: 'grapheme' }), (data) => {
+      const asciiOnly = [...data].every((c) => (c.codePointAt(0) ?? -1) < 128)
+      expect(doubleEncodedUTF8(e(data))).toBe(false)
+      expect(doubleEncodedUTF8(de(data))).toBe(!asciiOnly)
+    }),
+  )
 })

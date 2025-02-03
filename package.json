@@ -32,6 +32,7 @@
     "eslint": "^9.14.0",
     "eslint-plugin-oxlint": "^0.15.0",
     "eslint-plugin-vue": "^9.30.0",
+    "fast-check": "^3.23.2",
     "happy-dom": "^16.5.3",
     "npm-run-all2": "^7.0.1",
     "oxlint": "^0.15.0",
