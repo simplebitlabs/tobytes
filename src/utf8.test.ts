@@ -22,6 +22,18 @@ test('isValidUTF8', () => {
   const lotsofBytes = new TextEncoder().encode(lotsOfCharacters)
   expect(isValidUTF8(lotsofBytes)).toBe(true)
 
+  // many from https://www.reddit.com/r/Unicode/comments/hkpmgm/what_character_holds_the_most_bits/
+  const high_unicode_chars = [
+    '큁', // U+D041, UTF-8 encoding is 3 bytes starting with 0xF0
+    '\u{10FFFD}', // private use replacement character
+    '\u{E01EF}', // nonspacing mark - Variation Selector-256
+    '嶲', // U+2F9F4 CJK Compatibility Ideograph-2F9F4
+  ]
+  high_unicode_chars.forEach((char) => {
+    const charBytes = new TextEncoder().encode(char)
+    expect(isValidUTF8(charBytes)).toBe(true)
+  })
+
   // single byte invalid sequences
   expect(isValidUTF8([0xc0])).toBe(false)
   expect(isValidUTF8([0xc1])).toBe(false)
@@ -107,6 +119,10 @@ test('autodetectDoubleEncoded', () => {
     'trång',
     'Zażółć',
     'ပင်မစာမျက်နှာ',
+    '큁', // U+D041, UTF-8 encoding is 3 bytes starting with 0xF0
+    '\u{10FFFD}', // private use replacement character
+    '\u{E01EF}', // nonspacing mark - Variation Selector-256
+    '嶲', // U+2F9F4 CJK Compatibility Ideograph-2F9F4
   ]
 
   for (const str of testStrings) {
