@@ -82,7 +82,7 @@ const outputBytes = computed(() => {
 const recentCopy = ref(false)
 let copyTimeout: ReturnType<typeof setTimeout> | undefined
 
-async function copyToClipboard(event: Event) {
+async function copyToClipboard(_event: Event) {
   if (copyTimeout) {
     clearTimeout(copyTimeout)
   }

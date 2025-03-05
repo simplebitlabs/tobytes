@@ -16,6 +16,12 @@ export default [
 
   ...pluginVue.configs['flat/essential'],
   ...vueTsEslintConfig(),
-  oxlint.configs['flat/recommended'],
+  ...oxlint.configs['flat/recommended'],
   skipFormatting,
+
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
 ]
