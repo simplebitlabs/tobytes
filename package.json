@@ -29,7 +29,7 @@
     "@vue/eslint-config-typescript": "^14.4.0",
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.20.1",
-    "eslint-plugin-oxlint": "^0.16.6",
+    "eslint-plugin-oxlint": "^0.17.0",
     "eslint-plugin-vue": "^10.0.0",
     "fast-check": "^4.0.1",
     "happy-dom": "^17.1.0",
