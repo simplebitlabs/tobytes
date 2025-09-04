@@ -96,7 +96,7 @@ const escapeMapping: Record<number, string> = {
 }
 
 function cEscapeChar(c: number): string {
-  if (c in escapeMapping) {
+  if (escapeMapping[c] !== undefined) {
     return escapeMapping[c]
   } else if (c < 0) {
     return '\\ufffd'

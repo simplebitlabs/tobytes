@@ -1,9 +1,13 @@
-const between = (b: number, lower: number, upper: number) => b >= lower && b <= upper
-const continuation = (b: number) => b >= 0x80 && b <= 0xbf
+const between = (b: number | undefined, lower: number, upper: number) => b !== undefined && b >= lower && b <= upper
+const continuation = (b: number | undefined) => b !== undefined && b >= 0x80 && b <= 0xbf
 
 function isValidUTF8(input: Uint8Array | number[]): boolean {
   for (let i = 0; i < input.length; ) {
     const i0 = input[i]
+    // this should never happen, but just in case and for typescript purposes
+    if (i0 === undefined) {
+      return false
+    }
     // these characters are never present in valid UTF-8
     if (i0 == 0xc0 || i0 == 0xc1 || i0 >= 0xf5) {
       return false
