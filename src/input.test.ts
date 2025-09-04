@@ -12,8 +12,9 @@ import {
   autodetectInputType,
 } from './input'
 
+const enc = (str: string) => new TextEncoder().encode(str)
+
 test('escapeSequenceToBytes', () => {
-  const enc = (str: string) => new TextEncoder().encode(str)
   expect(escapeSequenceToBytes('')).toEqual(new Uint8Array())
   expect(escapeSequenceToBytes('\r\n')).toEqual(new Uint8Array([0x0d, 0x0a]))
   expect(escapeSequenceToBytes('\\r\\n')).toEqual(new Uint8Array([0x0d, 0x0a]))

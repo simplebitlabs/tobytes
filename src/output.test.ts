@@ -35,16 +35,16 @@ test('friendlyDataType', () => {
   expect(friendlyDataType(DataType.UTF8)).toEqual('UTF-8')
 })
 
-test('autodetectDataType', () => {
-  const e = (input: string) => new TextEncoder().encode(input)
+const enc = (input: string) => new TextEncoder().encode(input)
 
-  expect(autodetectDataType(e(''))).toBe(DataType.Unknown)
-  expect(autodetectDataType(e('hello world'))).toBe(DataType.ASCIIPrintable)
-  expect(autodetectDataType(e('hello\tworld\r\n'))).toBe(DataType.ASCIIPrintable)
-  expect(autodetectDataType(e('bell: \x07'))).toBe(DataType.ASCII)
-  expect(autodetectDataType(e('check: ✅'))).toBe(DataType.UTF8)
-  expect(autodetectDataType(e('wave: 👋'))).toBe(DataType.UTF8)
-  expect(autodetectDataType(e('adiós'))).toBe(DataType.UTF8)
+test('autodetectDataType', () => {
+  expect(autodetectDataType(enc(''))).toBe(DataType.Unknown)
+  expect(autodetectDataType(enc('hello world'))).toBe(DataType.ASCIIPrintable)
+  expect(autodetectDataType(enc('hello\tworld\r\n'))).toBe(DataType.ASCIIPrintable)
+  expect(autodetectDataType(enc('bell: \x07'))).toBe(DataType.ASCII)
+  expect(autodetectDataType(enc('check: ✅'))).toBe(DataType.UTF8)
+  expect(autodetectDataType(enc('wave: 👋'))).toBe(DataType.UTF8)
+  expect(autodetectDataType(enc('adiós'))).toBe(DataType.UTF8)
 
   expect(autodetectDataType(new Uint8Array([0x6a, 0xc7, 0x5f, 0xb1, 0xa7, 0x5f, 0xb1, 0xd7]))).toBe(DataType.Binary)
 })
