@@ -43,11 +43,11 @@ function friendlyDataType(value: DataType): string {
   return dataTypeNames[value] || DataType[value]
 }
 
-function autodetectDataType(bytes: Uint8Array): DataType {
-  // printable characters + horizontal tab, LF, CR
-  const asciiPrintable = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
-  const ascii = (b: number) => b <= 0x7f
+// printable characters + horizontal tab, LF, CR
+const asciiPrintable = (b: number) => (b >= 0x20 && b <= 0x7e) || b == 0x09 || b == 0x0a || b == 0x0d
+const ascii = (b: number) => b <= 0x7f
 
+function autodetectDataType(bytes: Uint8Array): DataType {
   if (bytes.length == 0) {
     return DataType.Unknown
   } else if (bytes.every(asciiPrintable)) {
