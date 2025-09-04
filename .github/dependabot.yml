@@ -13,3 +13,7 @@ updates:
           - 'eslint*'
           - 'oxlint'
           - 'typescript-eslint*'
+      test-dependencies:
+        patterns:
+          - 'vitest*'
+          - '@vitest*'
