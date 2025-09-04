@@ -32,7 +32,7 @@
     "eslint-plugin-oxlint": "^1.14.0",
     "eslint-plugin-vue": "^10.4.0",
     "fast-check": "^4.0.1",
-    "happy-dom": "^17.1.0",
+    "happy-dom": "^18.0.0",
     "npm-run-all2": "^8.0.0",
     "oxlint": "^1.14.0",
     "prettier": "^3.6.2",
