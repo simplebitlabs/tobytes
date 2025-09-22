@@ -40,6 +40,6 @@
     "vite": "^7.1.4",
     "vite-plugin-vue-devtools": "^8.0.1",
     "vitest": "^3.0.2",
-    "vue-tsc": "^3.0.0"
+    "vue-tsc": "^3.0.8"
   }
 }
