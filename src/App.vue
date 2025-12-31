@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
   </main>
 
   <footer>
-    Copyright © 2025
+    Copyright © 2026
     <a href="https://www.simplebitlabs.com/">Simple Bit Labs</a>. All Rights Reserved.<br />
     The Simple Bit Labs <a href="https://www.simplebitlabs.com/privacy/">Privacy Policy</a> and
     <a href="https://www.simplebitlabs.com/security/">Security Policy</a> may apply to usage of this application.
