@@ -18,28 +18,28 @@
   "dependencies": {
     "@picocss/pico": "^2.0.6",
     "entities": "^7.0.0",
-    "vue": "^3.5.21"
+    "vue": "^3.5.26"
   },
   "devDependencies": {
     "@testing-library/vue": "^8.1.0",
-    "@tsconfig/node24": "^24.0.0",
-    "@types/node": "^24.9.1",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vitest/coverage-v8": "^3.0.2",
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "^24.10.4",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
     "@vue/eslint-config-typescript": "^14.4.0",
     "@vue/tsconfig": "^0.8.0",
-    "eslint": "^9.34.0",
-    "eslint-plugin-oxlint": "^1.14.0",
-    "eslint-plugin-vue": "^10.4.0",
-    "fast-check": "^4.0.1",
+    "eslint": "^9.39.0",
+    "eslint-plugin-oxlint": "^1.36.0",
+    "eslint-plugin-vue": "^10.6.2",
+    "fast-check": "^4.5.3",
     "happy-dom": "^20.0.0",
     "npm-run-all2": "^8.0.0",
-    "oxlint": "^1.14.0",
-    "prettier": "^3.6.2",
+    "oxlint": "^1.36.0",
+    "prettier": "^3.7.4",
     "typescript": "~5.9.0",
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.1",
-    "vitest": "^3.0.2",
-    "vue-tsc": "^3.1.2"
+    "vitest": "^4.0.16",
+    "vue-tsc": "^3.2.1"
   }
 }
