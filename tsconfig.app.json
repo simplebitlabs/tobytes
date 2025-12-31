@@ -6,6 +6,7 @@
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "typeRoots": ["./node_modules/@types"],
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     }
