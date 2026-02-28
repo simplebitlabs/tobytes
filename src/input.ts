@@ -34,7 +34,7 @@ function escapeReplacer(match: string, grp: string): string {
       return '"'
     case 'x':
     case 'u':
-    case 'U':
+    case 'U': {
       // slice off the x/u/U prefix, and assume regex already validated the number of digits
       const num = parseInt(grp.slice(1), 16)
       if (!isNaN(num) && num <= 0x10ffff) {
@@ -43,7 +43,8 @@ function escapeReplacer(match: string, grp: string): string {
         // for now, just ignore out of range characters and pass through original match
         return match
       }
-    default:
+    }
+    default: {
       // handles octal escapes, which have no prefix
       if (grp.length <= 3 && /^\d+$/.test(grp)) {
         const num = parseInt(grp, 8)
@@ -56,6 +57,7 @@ function escapeReplacer(match: string, grp: string): string {
       } else {
         throw new ConversionError(`Invalid escape sequence: \\${grp}`)
       }
+    }
   }
 }
 

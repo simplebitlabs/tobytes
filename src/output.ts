@@ -111,9 +111,9 @@ function cEscapeChar(c: number): string {
   }
 }
 
-function exportCEscape(data: number[] | Uint8Array, isValidUTF8: boolean): string {
+function exportCEscape(data: number[] | Uint8Array, validUTF8: boolean): string {
   let chars: string[]
-  if (isValidUTF8) {
+  if (validUTF8) {
     const utf8 = bytesToUTF8(data)
     chars = [...utf8].map((c) => cEscapeChar(c.codePointAt(0) ?? -1))
   } else {
