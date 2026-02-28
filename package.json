@@ -28,7 +28,7 @@
     "@vitest/coverage-v8": "^4.0.17",
     "@vue/eslint-config-typescript": "^14.4.0",
     "@vue/tsconfig": "^0.8.0",
-    "eslint": "^9.39.0",
+    "eslint": "^10.0.2",
     "eslint-plugin-oxlint": "^1.36.0",
     "eslint-plugin-vue": "^10.6.2",
     "fast-check": "^4.5.3",
