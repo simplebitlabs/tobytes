@@ -18,7 +18,7 @@
   "dependencies": {
     "@picocss/pico": "^2.0.6",
     "entities": "^7.0.0",
-    "vue": "^3.5.26"
+    "vue": "^3.5.30"
   },
   "devDependencies": {
     "@testing-library/vue": "^8.1.0",
